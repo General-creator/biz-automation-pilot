@@ -17,6 +17,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const Profile = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -140,15 +141,21 @@ const Profile = () => {
               <CardContent>
                 <div className="flex flex-col items-center space-y-4 sm:items-start sm:space-y-6">
                   <div className="flex flex-col items-center gap-4 sm:flex-row">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage 
-                        src={avatarUrl} 
-                        alt={user?.email || "User"} 
-                      />
-                      <AvatarFallback className="text-2xl">
-                        {user?.email?.charAt(0).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="h-24 w-24 overflow-hidden rounded-full">
+                      <AspectRatio ratio={1 / 1} className="bg-muted">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt={user?.email || "User"}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-muted text-2xl uppercase">
+                            {user?.email?.charAt(0) || "U"}
+                          </div>
+                        )}
+                      </AspectRatio>
+                    </div>
                     <div>
                       <Button variant="outline" className="mt-2" onClick={() => setIsDialogOpen(true)}>
                         Change Avatar
@@ -233,12 +240,21 @@ const Profile = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center space-y-4">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={avatarUrl} alt="Preview" />
-                  <AvatarFallback className="text-2xl">
-                    {user?.email?.charAt(0).toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="h-24 w-24 overflow-hidden rounded-full">
+                  <AspectRatio ratio={1 / 1} className="bg-muted">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted text-2xl uppercase">
+                        {user?.email?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                    )}
+                  </AspectRatio>
+                </div>
                 <Button onClick={handleFileSelect} variant="default">
                   Select Image
                 </Button>
