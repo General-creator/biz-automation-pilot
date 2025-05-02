@@ -49,7 +49,7 @@ const sampleAutomations = [
   }
 ];
 
-const Automations = () => {
+const Agents = () => {
   const [automations, setAutomations] = useState<Automation[]>(sampleAutomations);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [newAutomation, setNewAutomation] = useState<{
@@ -78,7 +78,7 @@ const Automations = () => {
   const handleAddAutomation = () => {
     if (!newAutomation.name || !newAutomation.description || !newAutomation.platform) {
       toast("Please fill all fields", {
-        description: "All fields are required to connect a new automation."
+        description: "All fields are required to connect a new agent."
       });
       return;
     }
@@ -101,7 +101,7 @@ const Automations = () => {
     setAutomations([...automations, addedAutomation]);
     handleCloseDialog();
     
-    toast("Automation Connected", {
+    toast("Agent Connected", {
       description: `${newAutomation.name} has been successfully connected.`
     });
   };
@@ -120,27 +120,27 @@ const Automations = () => {
       <main className="flex-1 bg-gray-50 py-6">
         <div className="container">
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Automations</h1>
+            <h1 className="text-3xl font-bold">Agents</h1>
             <Button className="flex items-center gap-2" onClick={handleConnect}>
               <Plus className="h-4 w-4" />
-              Connect Automation
+              Connect Agent
             </Button>
           </div>
           
           {automations.length === 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle>Your Automations</CardTitle>
+                <CardTitle>Your Agents</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <p className="text-muted-foreground">No automations connected yet</p>
+                  <p className="text-muted-foreground">No agents connected yet</p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Connect your first automation to start managing it
+                    Connect your first agent to start managing it
                   </p>
                   <Button className="mt-4 flex items-center gap-2" onClick={handleConnect}>
                     <Plus className="h-4 w-4" />
-                    Connect Automation
+                    Connect Agent
                   </Button>
                 </div>
               </CardContent>
@@ -159,23 +159,23 @@ const Automations = () => {
         </div>
       </main>
 
-      {/* Connect Automation Dialog */}
+      {/* Connect Agent Dialog */}
       <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Connect Automation</DialogTitle>
+            <DialogTitle>Connect Agent</DialogTitle>
             <DialogDescription>
-              Connect an existing automation from your integrated platforms.
+              Connect an existing agent from your integrated platforms.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Automation Name</Label>
+              <Label htmlFor="name">Agent Name</Label>
               <Input 
                 id="name" 
                 value={newAutomation.name}
                 onChange={(e) => setNewAutomation({...newAutomation, name: e.target.value})}
-                placeholder="Enter automation name"
+                placeholder="Enter agent name"
               />
             </div>
             <div className="grid gap-2">
@@ -184,7 +184,7 @@ const Automations = () => {
                 id="description" 
                 value={newAutomation.description}
                 onChange={(e) => setNewAutomation({...newAutomation, description: e.target.value})}
-                placeholder="Describe what this automation does"
+                placeholder="Describe what this agent does"
               />
             </div>
             <div className="grid gap-2">
@@ -208,7 +208,7 @@ const Automations = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
-            <Button onClick={handleAddAutomation}>Connect Automation</Button>
+            <Button onClick={handleAddAutomation}>Connect Agent</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -216,4 +216,4 @@ const Automations = () => {
   );
 };
 
-export default Automations;
+export default Agents;

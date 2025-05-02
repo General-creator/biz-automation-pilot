@@ -13,7 +13,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 // Dashboard pages
 import Dashboard from "./pages/Dashboard";
-import Automations from "./pages/Automations";
+import Agents from "./pages/Automations";
 
 // Settings pages
 import Account from "./pages/settings/Account";
@@ -42,7 +42,7 @@ const App = () => (
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/automations" element={<Automations />} />
+              <Route path="/automations" element={<Agents />} />
               
               {/* Settings routes */}
               <Route path="/settings" element={<Settings />} />
