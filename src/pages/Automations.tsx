@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import AutomationCard from "@/components/AutomationCard";
+import AutomationCard, { Automation } from "@/components/AutomationCard";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ const sampleAutomations = [
     name: "New Customer Follow-up",
     description: "Sends a welcome email when a new customer signs up",
     platform: "Gmail" as const,
-    connectedPlatforms: ["HubSpot", "Zapier"] as Array<"HubSpot" | "Zapier">,
+    connectedPlatforms: ["HubSpot", "Zapier"] as Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">,
     status: "active" as const,
     last_run: new Date().toISOString(),
     next_run: new Date(Date.now() + 86400000).toISOString(), // tomorrow
@@ -30,7 +30,7 @@ const sampleAutomations = [
     name: "Lead Qualification",
     description: "Scores and categorizes new leads based on criteria",
     platform: "HubSpot" as const,
-    connectedPlatforms: ["Zapier", "Airtable"] as Array<"Zapier" | "Airtable">,
+    connectedPlatforms: ["Zapier", "Airtable"] as Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">,
     status: "paused" as const,
     last_run: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
     runs_today: 0,
@@ -41,7 +41,7 @@ const sampleAutomations = [
     name: "Payment Notification",
     description: "Sends notifications when payments are processed",
     platform: "Stripe" as const,
-    connectedPlatforms: ["Gmail", "Make"] as Array<"Gmail" | "Make">,
+    connectedPlatforms: ["Gmail", "Make"] as Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">,
     status: "failed" as const,
     last_run: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
     runs_today: 12,
@@ -50,7 +50,7 @@ const sampleAutomations = [
 ];
 
 const Automations = () => {
-  const [automations, setAutomations] = useState(sampleAutomations);
+  const [automations, setAutomations] = useState<Automation[]>(sampleAutomations);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [newAutomation, setNewAutomation] = useState({
     name: "",
@@ -81,13 +81,13 @@ const Automations = () => {
 
     const newId = (automations.length + 1).toString();
     
-    const addedAutomation = {
+    const addedAutomation: Automation = {
       id: newId,
       name: newAutomation.name,
       description: newAutomation.description,
       platform: newAutomation.platform as Automation["platform"],
       connectedPlatforms: [] as Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">,
-      status: "active" as const,
+      status: "active",
       last_run: new Date().toISOString(),
       next_run: new Date(Date.now() + 86400000).toISOString(),
       runs_today: 0,
