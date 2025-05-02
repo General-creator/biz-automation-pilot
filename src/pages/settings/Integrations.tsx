@@ -13,14 +13,14 @@ const Integrations = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 bg-gray-50 py-6">
-        <div className="container">
+      <main className="flex-1 bg-gradient-to-br from-[#4D7C79]/5 to-[#D94A38]/5 py-8">
+        <div className="container max-w-6xl mx-auto px-4">
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Integration Settings</h1>
+            <h1 className="text-3xl font-bold text-gradient-orbit">Integration Settings</h1>
             <Button 
               variant="default" 
               size="sm" 
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28]"
               onClick={() => setIsConnectDialogOpen(true)}
             >
               <Cog className="h-4 w-4" />
@@ -28,9 +28,9 @@ const Integrations = () => {
             </Button>
           </div>
           <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
-            <Card>
+            <Card className="card-glass">
               <CardHeader>
-                <CardTitle>Manage Integrations</CardTitle>
+                <CardTitle className="text-[#4D7C79]">Manage Integrations</CardTitle>
               </CardHeader>
               <CardContent>
                 <IntegrationsList />

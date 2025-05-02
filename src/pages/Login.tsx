@@ -42,14 +42,14 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#4D7C79]/5 to-[#D94A38]/5">
+      <div className="w-full max-w-md space-y-8 rounded-lg card-glass p-8 shadow-md">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">AutoPilot</h1>
-          <h2 className="mt-6 text-3xl font-extrabold">Sign in to your account</h2>
+          <h1 className="text-2xl font-bold">Orbit</h1>
+          <h2 className="mt-6 text-3xl font-extrabold text-gradient-orbit">Sign in to your account</h2>
           <p className="mt-2 text-sm text-gray-600">
             Or{" "}
-            <Link to="/register" className="font-medium text-primary hover:underline">
+            <Link to="/register" className="font-medium text-[#4D7C79] hover:underline">
               create a new account
             </Link>
           </p>
@@ -67,7 +67,7 @@ const Login = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
+                className="mt-1 border-slate-300 focus-visible:ring-[#4D7C79]"
                 placeholder="Email address"
               />
             </div>
@@ -82,7 +82,7 @@ const Login = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1"
+                className="mt-1 border-slate-300 focus-visible:ring-[#4D7C79]"
                 placeholder="Password"
               />
             </div>
@@ -90,7 +90,7 @@ const Login = () => {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <a href="#" className="font-medium text-primary hover:underline">
+              <a href="#" className="font-medium text-[#4D7C79] hover:underline">
                 Forgot your password?
               </a>
             </div>
@@ -99,7 +99,7 @@ const Login = () => {
           <div>
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28]"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Signing in..." : "Sign in"}

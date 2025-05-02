@@ -62,14 +62,14 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#4D7C79]/5 to-[#D94A38]/5">
+      <div className="w-full max-w-md space-y-8 rounded-lg card-glass p-8 shadow-md">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">AutoPilot</h1>
-          <h2 className="mt-6 text-3xl font-extrabold">Create your account</h2>
+          <h1 className="text-2xl font-bold">Orbit</h1>
+          <h2 className="mt-6 text-3xl font-extrabold text-gradient-orbit">Create your account</h2>
           <p className="mt-2 text-sm text-gray-600">
             Or{" "}
-            <Link to="/login" className="font-medium text-primary hover:underline">
+            <Link to="/login" className="font-medium text-[#4D7C79] hover:underline">
               sign in to your existing account
             </Link>
           </p>
@@ -86,7 +86,7 @@ const Register = () => {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1"
+                className="mt-1 border-slate-300 focus-visible:ring-[#4D7C79]"
                 placeholder="Full name"
               />
             </div>
@@ -101,7 +101,7 @@ const Register = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
+                className="mt-1 border-slate-300 focus-visible:ring-[#4D7C79]"
                 placeholder="Email address"
               />
             </div>
@@ -116,7 +116,7 @@ const Register = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1"
+                className="mt-1 border-slate-300 focus-visible:ring-[#4D7C79]"
                 placeholder="Password"
               />
             </div>
@@ -131,7 +131,7 @@ const Register = () => {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1"
+                className="mt-1 border-slate-300 focus-visible:ring-[#4D7C79]"
                 placeholder="Confirm password"
               />
             </div>
@@ -140,7 +140,7 @@ const Register = () => {
           <div>
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28]"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creating account..." : "Create account"}

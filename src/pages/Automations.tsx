@@ -117,28 +117,37 @@ const Agents = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 bg-gray-50 py-6">
-        <div className="container">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Agents</h1>
-            <Button className="flex items-center gap-2" onClick={handleConnect}>
+      <main className="flex-1 bg-gradient-to-br from-[#4D7C79]/5 to-[#D94A38]/5 py-8">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gradient-orbit">Agents</h1>
+              <p className="text-slate-600 mt-2">Connect and manage your business agents</p>
+            </div>
+            <Button 
+              className="flex items-center gap-2 bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28] shadow-md"
+              onClick={handleConnect}
+            >
               <Plus className="h-4 w-4" />
               Connect Agent
             </Button>
           </div>
           
           {automations.length === 0 ? (
-            <Card>
+            <Card className="card-glass">
               <CardHeader>
-                <CardTitle>Your Agents</CardTitle>
+                <CardTitle className="text-[#4D7C79]">Your Agents</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <p className="text-muted-foreground">No agents connected yet</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                <div className="flex flex-col items-center justify-center p-12 text-center">
+                  <p className="text-slate-600 text-lg">No agents connected yet</p>
+                  <p className="text-slate-500 mt-2">
                     Connect your first agent to start managing it
                   </p>
-                  <Button className="mt-4 flex items-center gap-2" onClick={handleConnect}>
+                  <Button 
+                    className="mt-6 flex items-center gap-2 bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28] shadow-md"
+                    onClick={handleConnect}
+                  >
                     <Plus className="h-4 w-4" />
                     Connect Agent
                   </Button>
@@ -161,41 +170,43 @@ const Agents = () => {
 
       {/* Connect Agent Dialog */}
       <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] card-glass">
           <DialogHeader>
-            <DialogTitle>Connect Agent</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[#4D7C79]">Connect Agent</DialogTitle>
+            <DialogDescription className="text-slate-600">
               Connect an existing agent from your integrated platforms.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Agent Name</Label>
+              <Label htmlFor="name" className="text-slate-700">Agent Name</Label>
               <Input 
                 id="name" 
                 value={newAutomation.name}
                 onChange={(e) => setNewAutomation({...newAutomation, name: e.target.value})}
                 placeholder="Enter agent name"
+                className="border-slate-300 focus-visible:ring-[#4D7C79]"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-slate-700">Description</Label>
               <Input 
                 id="description" 
                 value={newAutomation.description}
                 onChange={(e) => setNewAutomation({...newAutomation, description: e.target.value})}
                 placeholder="Describe what this agent does"
+                className="border-slate-300 focus-visible:ring-[#4D7C79]"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="platform">Platform</Label>
+              <Label htmlFor="platform" className="text-slate-700">Platform</Label>
               <Select 
                 onValueChange={(value) => setNewAutomation({...newAutomation, platform: value as Automation["platform"]})}
               >
-                <SelectTrigger id="platform">
+                <SelectTrigger id="platform" className="border-slate-300 focus:ring-[#4D7C79]">
                   <SelectValue placeholder="Select platform" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white/95 backdrop-blur-sm border-slate-200">
                   <SelectItem value="Zapier">Zapier</SelectItem>
                   <SelectItem value="Make">Make</SelectItem>
                   <SelectItem value="HubSpot">HubSpot</SelectItem>
@@ -207,8 +218,13 @@ const Agents = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
-            <Button onClick={handleAddAutomation}>Connect Agent</Button>
+            <Button variant="outline" onClick={handleCloseDialog} className="border-slate-300 text-slate-700 hover:bg-slate-100">Cancel</Button>
+            <Button 
+              onClick={handleAddAutomation}
+              className="bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28]"
+            >
+              Connect Agent
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

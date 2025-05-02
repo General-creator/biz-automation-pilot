@@ -121,13 +121,13 @@ const Dashboard = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 bg-gray-50 py-6">
-        <div className="container">
-          <h1 className="mb-6 text-3xl font-bold">Dashboard</h1>
+      <main className="flex-1 bg-gradient-to-br from-[#4D7C79]/5 to-[#D94A38]/5 py-8">
+        <div className="container max-w-6xl mx-auto px-4">
+          <h1 className="mb-6 text-3xl font-bold text-gradient-orbit">Dashboard</h1>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="card-glass">
               <CardHeader>
-                <CardTitle>Active Agents</CardTitle>
+                <CardTitle className="text-[#4D7C79]">Active Agents</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingAutomations ? (
@@ -136,12 +136,12 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center">
-                    <p className="text-4xl font-bold">{activeAutomations}</p>
+                    <p className="text-4xl font-bold text-[#D94A38]">{activeAutomations}</p>
                     <p className="text-sm text-muted-foreground">Running agents</p>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="mt-4" 
+                      className="mt-4 border-[#4D7C79] text-[#4D7C79] hover:bg-[#4D7C79]/10" 
                       onClick={handleViewAutomations}
                     >
                       View All
@@ -150,9 +150,9 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-glass">
               <CardHeader>
-                <CardTitle>Active Workflows</CardTitle>
+                <CardTitle className="text-[#4D7C79]">Active Workflows</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingWorkflows ? (
@@ -161,12 +161,12 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center">
-                    <p className="text-4xl font-bold">{activeWorkflows}</p>
+                    <p className="text-4xl font-bold text-[#D94A38]">{activeWorkflows}</p>
                     <p className="text-sm text-muted-foreground">Running workflows</p>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="mt-4" 
+                      className="mt-4 border-[#4D7C79] text-[#4D7C79] hover:bg-[#4D7C79]/10" 
                       onClick={handleViewWorkflows}
                     >
                       View All
@@ -175,9 +175,9 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-glass">
               <CardHeader>
-                <CardTitle>Connected Integrations</CardTitle>
+                <CardTitle className="text-[#4D7C79]">Connected Integrations</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingIntegrations ? (
@@ -186,12 +186,12 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center">
-                    <p className="text-4xl font-bold">{connectedIntegrationsCount}</p>
+                    <p className="text-4xl font-bold text-[#D94A38]">{connectedIntegrationsCount}</p>
                     <p className="text-sm text-muted-foreground">Connected services</p>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="mt-4" 
+                      className="mt-4 border-[#4D7C79] text-[#4D7C79] hover:bg-[#4D7C79]/10" 
                       onClick={handleViewIntegrations}
                     >
                       Manage
@@ -200,9 +200,9 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-glass">
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle className="text-[#4D7C79]">Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
                 {automations.length > 0 ? (
@@ -224,7 +224,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full mt-2" 
+                      className="w-full mt-2 border-[#4D7C79] text-[#4D7C79] hover:bg-[#4D7C79]/10" 
                       onClick={handleViewAutomations}
                     >
                       View All Activity

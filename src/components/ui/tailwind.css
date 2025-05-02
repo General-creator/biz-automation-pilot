@@ -12,6 +12,14 @@
     @apply bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent;
   }
   
+  .bg-gradient-orbit {
+    @apply bg-gradient-to-r from-[#4D7C79] to-[#D94A38];
+  }
+  
+  .text-gradient-orbit {
+    @apply bg-gradient-to-r from-[#4D7C79] to-[#D94A38] bg-clip-text text-transparent;
+  }
+  
   .card-glass {
     @apply bg-white/80 backdrop-blur-sm border-0 shadow-lg;
   }

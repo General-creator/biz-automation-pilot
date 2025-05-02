@@ -216,9 +216,9 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 container py-6">
+      <main className="flex-1 container py-6 bg-gradient-to-br from-[#4D7C79]/5 to-[#D94A38]/5">
         <div className="mb-6">
-          <h2 className="text-3xl font-bold tracking-tight">Welcome to Orbit</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-gradient-orbit">Welcome to Orbit</h2>
           <p className="text-muted-foreground mt-2">
             Manage and monitor all your business automations in one place.
           </p>
@@ -228,19 +228,23 @@ const Index = () => {
           <div className="md:col-span-4">
             <Tabs defaultValue="automations" className="space-y-6">
               <div className="flex justify-between items-center">
-                <TabsList>
-                  <TabsTrigger value="automations">Automations</TabsTrigger>
-                  <TabsTrigger value="activity">Activity</TabsTrigger>
-                  <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                <TabsList className="bg-white/50 backdrop-blur-sm">
+                  <TabsTrigger value="automations" className="data-[state=active]:bg-white data-[state=active]:text-[#4D7C79]">Automations</TabsTrigger>
+                  <TabsTrigger value="activity" className="data-[state=active]:bg-white data-[state=active]:text-[#4D7C79]">Activity</TabsTrigger>
+                  <TabsTrigger value="integrations" className="data-[state=active]:bg-white data-[state=active]:text-[#4D7C79]">Integrations</TabsTrigger>
                 </TabsList>
-                <Button onClick={handleCreateAutomation} size="sm">
+                <Button 
+                  onClick={handleCreateAutomation} 
+                  size="sm"
+                  className="bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28]"
+                >
                   <Plus className="h-4 w-4 mr-1" /> New Automation
                 </Button>
               </div>
               <TabsContent value="automations" className="space-y-6">
                 {isLoadingAutomations ? (
                   <div className="flex justify-center p-12">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                    <div className="animate-spin h-8 w-8 border-4 border-[#4D7C79] border-t-transparent rounded-full"></div>
                   </div>
                 ) : automations.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -261,7 +265,7 @@ const Index = () => {
               <TabsContent value="activity">
                 {isLoadingActivities ? (
                   <div className="flex justify-center p-12">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                    <div className="animate-spin h-8 w-8 border-4 border-[#4D7C79] border-t-transparent rounded-full"></div>
                   </div>
                 ) : (
                   <ActivityLog activities={activities} />
@@ -279,9 +283,9 @@ const Index = () => {
       </main>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="card-glass sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create New Automation</DialogTitle>
+            <DialogTitle className="text-[#4D7C79]">Create New Automation</DialogTitle>
             <DialogDescription>
               Fill in the details below to create a new automation workflow.
             </DialogDescription>
@@ -295,6 +299,7 @@ const Index = () => {
                 placeholder="E.g., New Lead Follow-up"
                 value={newAutomation.name}
                 onChange={(e) => setNewAutomation({...newAutomation, name: e.target.value})}
+                className="border-slate-300 focus-visible:ring-[#4D7C79]"
               />
             </div>
             
@@ -305,6 +310,7 @@ const Index = () => {
                 placeholder="Briefly describe what this automation does"
                 value={newAutomation.description}
                 onChange={(e) => setNewAutomation({...newAutomation, description: e.target.value})}
+                className="border-slate-300 focus-visible:ring-[#4D7C79]"
               />
             </div>
             
@@ -317,10 +323,10 @@ const Index = () => {
                   platform: value as Automation["platform"]
                 })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-slate-300 focus:ring-[#4D7C79]">
                   <SelectValue placeholder="Select a platform" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white/95 backdrop-blur-sm border-slate-200">
                   <SelectItem value="Zapier">Zapier</SelectItem>
                   <SelectItem value="Make">Make (Integromat)</SelectItem>
                   <SelectItem value="HubSpot">HubSpot</SelectItem>
@@ -333,12 +339,17 @@ const Index = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDialogOpen(false)}
+              className="border-slate-300 text-slate-700 hover:bg-slate-100"
+            >
               Cancel
             </Button>
             <Button 
               onClick={handleSaveAutomation}
               disabled={createAutomationMutation.isPending}
+              className="bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28]"
             >
               {createAutomationMutation.isPending ? "Creating..." : "Create Automation"}
             </Button>
@@ -346,7 +357,7 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
-      <footer className="border-t bg-white py-4">
+      <footer className="border-t bg-white/50 backdrop-blur-sm py-4">
         <div className="container flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             &copy; 2025 Orbit. All rights reserved.
