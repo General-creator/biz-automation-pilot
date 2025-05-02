@@ -2,6 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
 import IntegrationsList from "@/components/IntegrationsList";
+import { Button } from "@/components/ui/button";
+import { Cog } from "lucide-react";
 
 const Integrations = () => {
   return (
@@ -9,7 +11,13 @@ const Integrations = () => {
       <Header />
       <main className="flex-1 bg-gray-50 py-6">
         <div className="container">
-          <h1 className="mb-6 text-3xl font-bold">Integration Settings</h1>
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-3xl font-bold">Integration Settings</h1>
+            <Button variant="default" size="sm" className="flex items-center gap-2">
+              <Cog className="h-4 w-4" />
+              Manage Connections
+            </Button>
+          </div>
           <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
             <Card>
               <CardHeader>
