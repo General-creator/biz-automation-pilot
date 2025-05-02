@@ -117,28 +117,37 @@ const Workflows = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 bg-gray-50 py-6">
-        <div className="container">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Workflows</h1>
-            <Button className="flex items-center gap-2" onClick={handleConnect}>
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-50 py-8">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">Workflows</h1>
+              <p className="text-slate-600 mt-2">Connect and manage your business workflows</p>
+            </div>
+            <Button 
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md"
+              onClick={handleConnect}
+            >
               <Plus className="h-4 w-4" />
               Connect Workflow
             </Button>
           </div>
           
           {workflows.length === 0 ? (
-            <Card>
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle>Your Workflows</CardTitle>
+                <CardTitle className="text-blue-800">Your Workflows</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <p className="text-muted-foreground">No workflows connected yet</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                <div className="flex flex-col items-center justify-center p-12 text-center">
+                  <p className="text-slate-600 text-lg">No workflows connected yet</p>
+                  <p className="text-slate-500 mt-2">
                     Connect your first workflow to start managing it
                   </p>
-                  <Button className="mt-4 flex items-center gap-2" onClick={handleConnect}>
+                  <Button 
+                    className="mt-6 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md"
+                    onClick={handleConnect}
+                  >
                     <Plus className="h-4 w-4" />
                     Connect Workflow
                   </Button>
@@ -146,7 +155,7 @@ const Workflows = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {workflows.map((workflow) => (
                 <AutomationCard 
                   key={workflow.id} 
@@ -161,41 +170,43 @@ const Workflows = () => {
 
       {/* Connect Workflow Dialog */}
       <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] border-0 shadow-lg bg-white/95 backdrop-blur-sm">
           <DialogHeader>
-            <DialogTitle>Connect Workflow</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-blue-800">Connect Workflow</DialogTitle>
+            <DialogDescription className="text-slate-600">
               Connect an existing workflow from your integrated platforms.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Workflow Name</Label>
+              <Label htmlFor="name" className="text-slate-700">Workflow Name</Label>
               <Input 
                 id="name" 
                 value={newWorkflow.name}
                 onChange={(e) => setNewWorkflow({...newWorkflow, name: e.target.value})}
                 placeholder="Enter workflow name"
+                className="border-slate-300 focus-visible:ring-blue-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-slate-700">Description</Label>
               <Input 
                 id="description" 
                 value={newWorkflow.description}
                 onChange={(e) => setNewWorkflow({...newWorkflow, description: e.target.value})}
                 placeholder="Describe what this workflow does"
+                className="border-slate-300 focus-visible:ring-blue-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="platform">Platform</Label>
+              <Label htmlFor="platform" className="text-slate-700">Platform</Label>
               <Select 
                 onValueChange={(value) => setNewWorkflow({...newWorkflow, platform: value as Automation["platform"]})}
               >
-                <SelectTrigger id="platform">
+                <SelectTrigger id="platform" className="border-slate-300 focus:ring-blue-500">
                   <SelectValue placeholder="Select platform" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white/95 backdrop-blur-sm border-slate-200">
                   <SelectItem value="Zapier">Zapier</SelectItem>
                   <SelectItem value="Make">Make</SelectItem>
                   <SelectItem value="HubSpot">HubSpot</SelectItem>
@@ -207,8 +218,13 @@ const Workflows = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
-            <Button onClick={handleAddWorkflow}>Connect Workflow</Button>
+            <Button variant="outline" onClick={handleCloseDialog} className="border-slate-300 text-slate-700 hover:bg-slate-100">Cancel</Button>
+            <Button 
+              onClick={handleAddWorkflow}
+              className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800"
+            >
+              Connect Workflow
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

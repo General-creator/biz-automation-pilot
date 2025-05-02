@@ -1,0 +1,18 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .bg-gradient-blue {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-700;
+  }
+  
+  .text-gradient-blue {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent;
+  }
+  
+  .card-glass {
+    @apply bg-white/80 backdrop-blur-sm border-0 shadow-lg;
+  }
+}
