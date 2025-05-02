@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Define notification type
 interface Notification {
   id: string;
-  automationId: string;
   automationName: string;
   message: string;
   timestamp: string;
@@ -31,33 +29,16 @@ const Header = () => {
   const { user, logout } = useAuth();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-  // Mock data for notifications
-  const mockNotifications: Notification[] = [
-    {
-      id: "1",
-      automationId: "auto1",
-      automationName: "Daily Report",
-      message: "Report generated successfully",
-      timestamp: new Date().toISOString(),
-      severity: "low" as const
-    },
-    {
-      id: "2",
-      automationId: "auto2",
-      automationName: "Backup Task",
-      message: "Backup failed, please check credentials",
-      timestamp: new Date().toISOString(),
-      severity: "high" as const
-    },
-    {
-      id: "3",
-      automationId: "auto3",
-      automationName: "Email Campaign",
-      message: "Campaign is running",
-      timestamp: new Date().toISOString(),
-      severity: "medium" as const
-    }
-  ];
+  // Just one welcome notification
+  const welcomeNotification: Notification = {
+    id: "welcome",
+    automationName: "Automator",
+    message: "Welcome to Automator! Get started by exploring our features.",
+    timestamp: new Date().toLocaleString(),
+    severity: "low" as const
+  };
+  
+  const [notifications, setNotifications] = useState<Notification[]>([welcomeNotification]);
 
   const handleSignOut = async () => {
     try {
@@ -65,6 +46,10 @@ const Header = () => {
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const dismissNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
   };
 
   const getSeverityColor = (severity: string) => {
@@ -156,9 +141,9 @@ const Header = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative">
               <Bell className="h-5 w-5" />
-              {mockNotifications.length > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-                  {mockNotifications.length}
+              {notifications.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">
+                  {notifications.length}
                 </span>
               )}
               <span className="sr-only">Notifications</span>
@@ -168,8 +153,8 @@ const Header = () => {
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <ScrollArea className="h-[300px]">
-              {mockNotifications.length > 0 ? (
-                mockNotifications.map((notification) => (
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
                     className="cursor-pointer p-0"
@@ -192,6 +177,15 @@ const Header = () => {
                       <p className="text-xs text-muted-foreground">
                         {formatTimestamp(notification.timestamp)}
                       </p>
+                      <div className="mt-2 flex justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => dismissNotification(notification.id)}
+                        >
+                          Got it
+                        </Button>
+                      </div>
                     </div>
                   </DropdownMenuItem>
                 ))

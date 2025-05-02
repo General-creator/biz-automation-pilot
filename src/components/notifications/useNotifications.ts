@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,42 +5,31 @@ import { toast } from "sonner";
 import { Notification } from "./types";
 
 export const useNotifications = (initialNotifications?: Notification[]) => {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications || []);
+  // Default to welcome notification if no initialNotifications provided
+  const defaultWelcomeNotification: Notification = {
+    id: "welcome-notification",
+    automationName: "Automator",
+    message: "Welcome to Automator! Get started by exploring our features.",
+    timestamp: new Date().toLocaleString(),
+    severity: "low"
+  };
   
-  // Fetch automations with issues to generate notifications
+  const [notifications, setNotifications] = useState<Notification[]>(
+    initialNotifications || [defaultWelcomeNotification]
+  );
+  
+  // We don't need to fetch automation issues anymore since we only want welcome notifications
   const { data: automations } = useQuery({
-    queryKey: ["automations-with-issues"],
+    queryKey: ["welcome-notification"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("automations")
-        .select("*")
-        .or("failed_runs.gt.0");
-      
-      if (error) {
-        toast("Failed to load automations with issues", {
-          description: error.message,
-        });
-        throw error;
+      // If initial notifications were provided, use those
+      if (initialNotifications) {
+        return [];
       }
       
-      // Generate notifications from automations with issues
-      if (data && data.length > 0) {
-        const newNotifications: Notification[] = data.map(automation => ({
-          id: `notification-${automation.id}`,
-          automationId: automation.id,
-          automationName: automation.name,
-          message: automation.failed_runs > 0 
-            ? `${automation.failed_runs} consecutive failures detected`
-            : "Issue detected with this automation",
-          timestamp: new Date(automation.updated_at || Date.now()).toLocaleString(),
-          severity: automation.failed_runs > 3 ? "high" : "medium"
-        }));
-        
-        setNotifications(newNotifications);
-        return data;
-      }
-      
-      return data || [];
+      // Otherwise return just the welcome notification
+      setNotifications([defaultWelcomeNotification]);
+      return [];
     },
     enabled: initialNotifications === undefined,
   });

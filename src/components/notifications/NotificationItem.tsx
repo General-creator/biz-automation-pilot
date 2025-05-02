@@ -1,8 +1,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Notification } from "./types";
 
@@ -12,29 +10,6 @@ interface NotificationItemProps {
 }
 
 const NotificationItem = ({ notification, onDismiss }: NotificationItemProps) => {
-  const queryClient = useQueryClient();
-  
-  // Reset failed runs for an automation
-  const resetAutomationIssue = useMutation({
-    mutationFn: async (automationId: string) => {
-      const { data, error } = await supabase
-        .from("automations")
-        .update({
-          failed_runs: 0,
-          status: "active"
-        })
-        .eq("id", automationId)
-        .select();
-        
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["automations"] });
-      queryClient.invalidateQueries({ queryKey: ["automations-with-issues"] });
-    }
-  });
-  
   const getSeverityBadge = (severity: "high" | "medium" | "low") => {
     switch (severity) {
       case "high":
@@ -55,36 +30,6 @@ const NotificationItem = ({ notification, onDismiss }: NotificationItemProps) =>
             Low
           </Badge>
         );
-    }
-  };
-  
-  const handleFixIssue = () => {
-    if (notification.automationId) {
-      resetAutomationIssue.mutate(notification.automationId, {
-        onSuccess: () => {
-          onDismiss(notification.id);
-          toast("Issue fixed", {
-            description: `Issue with ${notification.automationName} has been resolved.`,
-          });
-        },
-        onError: (error) => {
-          toast("Failed to fix issue", {
-            description: `Error: ${error.message}`,
-          });
-        }
-      });
-    } else {
-      toast("Attempting to fix issue", {
-        description: `Working on resolving issue with ${notification.automationName}.`,
-      });
-      
-      // Remove notification after a delay to simulate fixing
-      setTimeout(() => {
-        onDismiss(notification.id);
-        toast("Issue fixed", {
-          description: `Issue with ${notification.automationName} has been resolved.`,
-        });
-      }, 1500);
     }
   };
 
@@ -108,14 +53,7 @@ const NotificationItem = ({ notification, onDismiss }: NotificationItemProps) =>
           size="sm"
           onClick={() => onDismiss(notification.id)}
         >
-          Dismiss
-        </Button>
-        <Button 
-          size="sm"
-          onClick={handleFixIssue}
-          disabled={resetAutomationIssue.isPending}
-        >
-          {resetAutomationIssue.isPending ? "Fixing..." : "Fix Issue"}
+          Got it
         </Button>
       </div>
     </div>
