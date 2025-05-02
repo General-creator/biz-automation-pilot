@@ -36,6 +36,28 @@ const Dashboard = () => {
     enabled: !!user
   });
 
+  // Fetch workflows (using the same automation data but treating them as workflows for the UI)
+  const { data: workflows = [], isLoading: isLoadingWorkflows } = useQuery({
+    queryKey: ["workflows"],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from("automations")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching workflows:", error);
+        return [];
+      }
+      
+      return data as Automation[];
+    },
+    enabled: !!user
+  });
+
   // Fetch integrations
   const { data: integrations = [], isLoading: isLoadingIntegrations } = useQuery({
     queryKey: ["integrations"],
@@ -71,6 +93,11 @@ const Dashboard = () => {
     automation => automation.status === "active"
   ).length;
 
+  // Count active workflows
+  const activeWorkflows = workflows.filter(
+    workflow => workflow.status === "active"
+  ).length;
+
   // Count connected integrations
   const connectedIntegrationsCount = integrations.length;
 
@@ -89,6 +116,7 @@ const Dashboard = () => {
   // Handle navigation to pages
   const handleViewAutomations = () => navigate("/automations");
   const handleViewIntegrations = () => navigate("/settings/integrations");
+  const handleViewWorkflows = () => navigate("/workflows");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -96,7 +124,7 @@ const Dashboard = () => {
       <main className="flex-1 bg-gray-50 py-6">
         <div className="container">
           <h1 className="mb-6 text-3xl font-bold">Dashboard</h1>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader>
                 <CardTitle>Active Agents</CardTitle>
@@ -115,6 +143,31 @@ const Dashboard = () => {
                       size="sm" 
                       className="mt-4" 
                       onClick={handleViewAutomations}
+                    >
+                      View All
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Workflows</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoadingWorkflows ? (
+                  <div className="flex justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-4xl font-bold">{activeWorkflows}</p>
+                    <p className="text-sm text-muted-foreground">Running workflows</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-4" 
+                      onClick={handleViewWorkflows}
                     >
                       View All
                     </Button>
