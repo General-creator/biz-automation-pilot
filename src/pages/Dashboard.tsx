@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -307,8 +308,9 @@ const Dashboard = () => {
           {/* Main content - left 2/3 */}
           <div className="col-span-1 lg:col-span-2 space-y-6">
             
-            {/* Analytics charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Analytics charts - NOW STACKED VERTICALLY */}
+            <div className="space-y-6">
+              {/* Monthly Cost Chart */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center">
@@ -354,6 +356,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
               
+              {/* Weekly Execution Trends Chart */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
