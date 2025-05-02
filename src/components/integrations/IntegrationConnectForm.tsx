@@ -142,9 +142,7 @@ const IntegrationConnectForm = ({
         if (values.clientSecret) connectionData.client_secret = values.clientSecret;
       }
       
-      const result = await reconnectIntegration(values.id, connectionData);
-      if (!result.success) throw new Error(result.message);
-      return result.data;
+      return reconnectIntegration(values.id, connectionData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["integrations"] });
@@ -167,6 +165,7 @@ const IntegrationConnectForm = ({
     }
     
     if (isReconnecting && reconnectIntegration) {
+      // Fix: Pass the integration ID directly rather than calling it as a function
       reconnectMutation.mutate({ ...values, id: reconnectIntegration.id });
     } else {
       connectMutation.mutate(values);
