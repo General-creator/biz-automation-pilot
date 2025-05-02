@@ -4,8 +4,12 @@ import Header from "@/components/Header";
 import IntegrationsList from "@/components/IntegrationsList";
 import { Button } from "@/components/ui/button";
 import { Cog } from "lucide-react";
+import { useState } from "react";
+import IntegrationConnectForm from "@/components/integrations/IntegrationConnectForm";
 
 const Integrations = () => {
+  const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -13,9 +17,14 @@ const Integrations = () => {
         <div className="container">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-3xl font-bold">Integration Settings</h1>
-            <Button variant="default" size="sm" className="flex items-center gap-2">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="flex items-center gap-2"
+              onClick={() => setIsConnectDialogOpen(true)}
+            >
               <Cog className="h-4 w-4" />
-              Manage Connections
+              Connect New Integration
             </Button>
           </div>
           <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
@@ -30,6 +39,11 @@ const Integrations = () => {
           </div>
         </div>
       </main>
+      
+      <IntegrationConnectForm 
+        isOpen={isConnectDialogOpen}
+        onClose={() => setIsConnectDialogOpen(false)}
+      />
     </div>
   );
 };
