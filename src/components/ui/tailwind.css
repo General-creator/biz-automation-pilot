@@ -24,3 +24,14 @@
     @apply bg-white/80 backdrop-blur-sm border-0 shadow-lg;
   }
 }
+
+/* Custom switch component styling */
+@layer components {
+  .switch-orbit[data-state="checked"] {
+    @apply bg-gradient-to-r from-[#4D7C79] to-[#D94A38] !important;
+  }
+  
+  .toggle-orbit[data-state="on"] {
+    @apply bg-gradient-to-r from-[#4D7C79] to-[#D94A38] text-white !important;
+  }
+}
