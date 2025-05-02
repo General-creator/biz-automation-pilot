@@ -1,5 +1,4 @@
 
-// Update the IntegrationsList component to accept integrations prop
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -151,6 +150,56 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
     }
   });
 
+  // Updated disconnect mutation
+  const disconnectIntegrationMutation = useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      const { data, error } = await supabase
+        .from("integrations")
+        .update({ status: "disconnected" })
+        .eq("id", id)
+        .select();
+        
+      if (error) throw error;
+      return data[0];
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["integrations"] });
+      toast(`${data.name} disconnected`, {
+        description: "Integration has been disconnected successfully.",
+      });
+    },
+    onError: (error) => {
+      toast("Failed to disconnect", {
+        description: error.message,
+      });
+    }
+  });
+
+  // Updated reconnect mutation
+  const reconnectIntegrationMutation = useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      const { data, error } = await supabase
+        .from("integrations")
+        .update({ status: "connected" })
+        .eq("id", id)
+        .select();
+        
+      if (error) throw error;
+      return data[0];
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["integrations"] });
+      toast(`${data.name} reconnected`, {
+        description: "Integration has been reconnected successfully.",
+      });
+    },
+    onError: (error) => {
+      toast("Failed to reconnect", {
+        description: error.message,
+      });
+    }
+  });
+
   const handleSaveIntegration = () => {
     if (!newIntegration.name || !newIntegration.type) {
       toast("Please fill in all required fields", {
@@ -166,44 +215,14 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
     setIsDialogOpen(true);
   };
 
-  const handleDisconnect = async (id: string, name: string) => {
-    try {
-      const { error } = await supabase
-        .from("integrations")
-        .update({ status: "disconnected" })
-        .eq("id", id);
-        
-      if (error) throw error;
-      
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
-      toast(`${name} disconnected`, {
-        description: "Integration has been disconnected successfully.",
-      });
-    } catch (error: any) {
-      toast("Failed to disconnect", {
-        description: error.message,
-      });
-    }
+  // Updated disconnect handler to use the mutation
+  const handleDisconnect = (id: string) => {
+    disconnectIntegrationMutation.mutate({ id });
   };
 
-  const handleReconnect = async (id: string, name: string) => {
-    try {
-      const { error } = await supabase
-        .from("integrations")
-        .update({ status: "connected" })
-        .eq("id", id);
-        
-      if (error) throw error;
-      
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
-      toast(`${name} reconnected`, {
-        description: "Integration has been reconnected successfully.",
-      });
-    } catch (error: any) {
-      toast("Failed to reconnect", {
-        description: error.message,
-      });
-    }
+  // Updated reconnect handler to use the mutation
+  const handleReconnect = (id: string) => {
+    reconnectIntegrationMutation.mutate({ id });
   };
   
   if (isLoading && !propIntegrations) {
@@ -293,9 +312,10 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
                           size="sm"
                           onClick={() => 
                             integration.isConnected 
-                              ? handleDisconnect(integration.id, integration.name) 
-                              : handleReconnect(integration.id, integration.name)
+                              ? handleDisconnect(integration.id) 
+                              : handleReconnect(integration.id)
                           }
+                          disabled={disconnectIntegrationMutation.isPending || reconnectIntegrationMutation.isPending}
                         >
                           {integration.isConnected ? "Disconnect" : "Reconnect"}
                         </Button>
