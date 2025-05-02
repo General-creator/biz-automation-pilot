@@ -10,6 +10,9 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import Automations from "./pages/Automations";
+import Integrations from "./pages/Integrations";
+import Analytics from "./pages/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +30,9 @@ const App = () => (
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/automations" element={<Automations />} />
+              <Route path="/integrations" element={<Integrations />} />
+              <Route path="/analytics" element={<Analytics />} />
               {/* Add other protected routes here */}
             </Route>
             
