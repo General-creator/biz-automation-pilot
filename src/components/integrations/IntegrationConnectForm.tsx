@@ -6,7 +6,7 @@ import { AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { saveIntegration, ConnectionData, reconnectIntegration } from "@/integrations/integration-service";
+import { saveIntegration, ConnectionData, reconnectIntegration as reconnectIntegrationService } from "@/integrations/integration-service";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -126,7 +126,7 @@ const IntegrationConnectForm = ({
     }
   });
   
-  // Reconnect mutation - fixed to avoid type errors
+  // Reconnect mutation - renamed the imported function to avoid name collision
   const reconnectMutation = useMutation({
     mutationFn: async (data: { values: IntegrationFormValues; integrationId: string }) => {
       if (!user) throw new Error("User not authenticated");
@@ -143,7 +143,7 @@ const IntegrationConnectForm = ({
         if (values.clientSecret) connectionData.client_secret = values.clientSecret;
       }
       
-      return reconnectIntegration(data.integrationId, connectionData);
+      return reconnectIntegrationService(data.integrationId, connectionData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["integrations"] });
@@ -166,7 +166,6 @@ const IntegrationConnectForm = ({
     }
     
     if (isReconnecting && reconnectIntegration) {
-      // Fixed: Pass the integration ID as a separate parameter
       reconnectMutation.mutate({ 
         values: values, 
         integrationId: reconnectIntegration.id 
