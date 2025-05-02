@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +6,20 @@ import ActivityLog, { ActivityItem } from "@/components/ActivityLog";
 import NotificationPanel, { Notification } from "@/components/NotificationPanel";
 import IntegrationsList from "@/components/IntegrationsList";
 import { Button } from "@/components/ui/button";
-import { Activity, ArrowUpRight, CheckCircle, Clock, DollarSign, PauseCircle, PlusCircle } from "lucide-react";
+import { 
+  Activity, 
+  ArrowUpRight, 
+  CheckCircle, 
+  Clock, 
+  DollarSign, 
+  PauseCircle, 
+  PlusCircle,
+  ChartLine,
+  ChartBar
+} from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, CartesianGrid } from "recharts";
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, CartesianGrid, Tooltip } from "recharts";
 import { Input } from "@/components/ui/input";
 
 // Sample data - this would come from your API in a real application
@@ -164,7 +173,7 @@ const integrations = [
   }
 ];
 
-// Sample chart data
+// Sample chart data with improved formatting
 const costData = [
   { name: "Jan", cost: 250 },
   { name: "Feb", cost: 320 },
@@ -187,7 +196,7 @@ const runData = [
 const costConfig = {
   cost: {
     label: "Cost ($)",
-    theme: { light: "#3b82f6", dark: "#60a5fa" },
+    theme: { light: "#60a5fa", dark: "#3b82f6" }, // Swapped for better visibility
   }
 };
 
@@ -303,17 +312,43 @@ const Dashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center">
-                    <span>Monthly Cost</span>
+                    <div className="flex items-center gap-2">
+                      <ChartLine className="h-5 w-5 text-primary" />
+                      <span>Monthly Cost</span>
+                    </div>
                     <span className="text-lg font-normal text-muted-foreground">$1,890</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ChartContainer config={costConfig} className="h-64">
-                    <LineChart data={costData}>
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={2} />
+                <CardContent className="pb-6">
+                  <ChartContainer config={costConfig} className="h-72">
+                    <LineChart data={costData} margin={{ top: 20, right: 20, bottom: 20, left: 25 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false}
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        width={40}
+                        tickFormatter={(value) => `${value}`}
+                      />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />} 
+                        cursor={{ stroke: '#ddd', strokeWidth: 1, strokeDasharray: '3 3' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="cost" 
+                        stroke="#60a5fa" 
+                        strokeWidth={3} 
+                        dot={{ stroke: '#60a5fa', strokeWidth: 2, r: 4, fill: 'white' }}
+                        activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2, fill: 'white' }}
+                      />
                     </LineChart>
                   </ChartContainer>
                 </CardContent>
@@ -321,17 +356,48 @@ const Dashboard = () => {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Weekly Execution Trends</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <ChartBar className="h-5 w-5 text-primary" />
+                    <span>Weekly Execution Trends</span>
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ChartContainer config={runConfig} className="h-64">
-                    <BarChart data={runData}>
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CardContent className="pb-6">
+                  <ChartContainer config={runConfig} className="h-72">
+                    <BarChart 
+                      data={runData} 
+                      margin={{ top: 20, right: 20, bottom: 20, left: 10 }}
+                      barGap={0}
+                      barSize={18}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="day" 
+                        scale="point" 
+                        padding={{ left: 20, right: 20 }}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false}
+                        tick={{ fill: '#888', fontSize: 12 }}
+                        width={25}
+                      />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="successful" fill="#10b981" stackId="stack" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="failed" fill="#ef4444" stackId="stack" radius={[4, 4, 0, 0]} />
+                      <Bar 
+                        dataKey="successful" 
+                        fill="#10b981" 
+                        stackId="stack" 
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar 
+                        dataKey="failed" 
+                        fill="#ef4444" 
+                        stackId="stack" 
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ChartContainer>
                 </CardContent>
