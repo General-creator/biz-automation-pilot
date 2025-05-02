@@ -20,6 +20,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>; // New function to refresh profile data
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,6 +58,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Error fetching profile:', error);
       return null;
+    }
+  };
+
+  // New function to refresh profile
+  const refreshProfile = async () => {
+    if (user) {
+      const userProfile = await fetchProfile(user.id);
+      setProfile(userProfile);
     }
   };
 
@@ -180,7 +189,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      profile, 
+      session, 
+      isLoading, 
+      login, 
+      register, 
+      logout,
+      refreshProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );
