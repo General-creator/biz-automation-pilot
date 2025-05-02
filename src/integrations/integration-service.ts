@@ -1,4 +1,3 @@
-
 import { supabase } from "./supabase/client";
 import { toast } from "sonner";
 
@@ -11,7 +10,19 @@ export interface IntegrationConfig {
   documentation: string;
 }
 
-// Map of supported integrations with their specific configurations
+// Default fields and documentation by integration type
+export const integrationTypeConfig: Record<string, {requiredFields: string[], documentation: string}> = {
+  "workflow": {
+    requiredFields: ["api_key"],
+    documentation: "https://docs.lovable.dev/integrations/workflows"
+  },
+  "agent": {
+    requiredFields: ["api_key"],
+    documentation: "https://docs.lovable.dev/integrations/agents"
+  }
+};
+
+// Map of supported integrations with their specific configurations - keeping for backward compatibility
 export const supportedIntegrations: Record<string, IntegrationConfig> = {
   "Zapier": {
     name: "Zapier",
@@ -64,17 +75,15 @@ export interface ConnectionData {
 
 // Test a connection to verify credentials work
 export async function testConnection(
-  integration: string,
-  connectionData: ConnectionData,
-  userId: string
+  integrationName: string,
+  integrationType: string,
+  connectionData: ConnectionData
 ): Promise<{ success: boolean; message: string }> {
   try {
-    // For now we'll simulate testing the connection
-    // In a real app, you would make an API call to the integration service
-    
-    const config = supportedIntegrations[integration];
+    // Get required fields based on integration type
+    const config = integrationTypeConfig[integrationType];
     if (!config) {
-      return { success: false, message: "Unsupported integration" };
+      return { success: false, message: "Unsupported integration type" };
     }
     
     // Check if all required fields are present
@@ -88,13 +97,11 @@ export async function testConnection(
     }
     
     // Simulate API verification
-    console.log(`Testing connection to ${integration} with data:`, connectionData);
+    console.log(`Testing connection to ${integrationName} (${integrationType}) with data:`, connectionData);
     
-    // In a real implementation, we would validate the credentials with the service
-    // For now, we'll simulate success if all required fields are present
     return { 
       success: true, 
-      message: `Successfully connected to ${integration}` 
+      message: `Successfully connected to ${integrationName}` 
     };
   } catch (error) {
     console.error("Integration test error:", error);
@@ -108,13 +115,13 @@ export async function testConnection(
 // Save integration connection to the database
 export async function saveIntegration(
   userId: string,
-  integration: string,
-  type: string,
+  integrationName: string,
+  integrationType: string,
   connectionData: ConnectionData
 ) {
   try {
     // First, test the connection
-    const testResult = await testConnection(integration, connectionData, userId);
+    const testResult = await testConnection(integrationName, integrationType, connectionData);
     
     if (!testResult.success) {
       toast.error("Connection failed", {
@@ -128,8 +135,8 @@ export async function saveIntegration(
       .from("integrations")
       .insert({
         user_id: userId,
-        name: integration,
-        type: type,
+        name: integrationName,
+        type: integrationType,
         api_key: JSON.stringify(connectionData), // Store connection data as JSON
         status: "connected"
       })
@@ -142,7 +149,7 @@ export async function saveIntegration(
       return { success: false, message: error.message };
     }
     
-    toast.success(`${integration} connected successfully`, {
+    toast.success(`${integrationName} connected successfully`, {
       description: "The integration is now ready to use"
     });
     

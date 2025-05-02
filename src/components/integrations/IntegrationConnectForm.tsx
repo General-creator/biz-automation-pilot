@@ -22,46 +22,49 @@ interface IntegrationConnectFormProps {
 const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [integrationName, setIntegrationType] = useState("");
-  const [integrationType, setIntegrationCategory] = useState("");
+  const [integrationName, setIntegrationName] = useState("");
+  const [integrationType, setIntegrationType] = useState("");
   const [connectionFields, setConnectionFields] = useState<ConnectionData>({});
   const [integrationInfo, setIntegrationInfo] = useState<{ fields: string[], documentation: string } | null>(null);
   
   // Reset form when closed
   useEffect(() => {
     if (!isOpen) {
+      setIntegrationName("");
       setIntegrationType("");
-      setIntegrationCategory("");
       setConnectionFields({});
       setIntegrationInfo(null);
     }
   }, [isOpen]);
   
-  // Update required fields when integration changes
+  // Update required fields based on connection type 
   useEffect(() => {
-    if (integrationName && supportedIntegrations[integrationName]) {
-      const config = supportedIntegrations[integrationName];
+    if (integrationType) {
+      // Default fields for API connections
+      const fields = ["api_key"];
+      const documentation = "https://docs.example.com";
+      
       setIntegrationInfo({
-        fields: config.requiredFields,
-        documentation: config.documentation
+        fields,
+        documentation
       });
-      setIntegrationCategory(config.type);
       
       // Initialize fields object
       const initialFields: ConnectionData = {};
-      config.requiredFields.forEach(field => {
+      fields.forEach(field => {
         initialFields[field] = "";
       });
       setConnectionFields(initialFields);
     } else {
       setIntegrationInfo(null);
     }
-  }, [integrationName]);
+  }, [integrationType]);
   
   const connectMutation = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("User not authenticated");
-      if (!integrationName) throw new Error("No integration selected");
+      if (!integrationType) throw new Error("No integration type selected");
+      if (!integrationName.trim()) throw new Error("Integration name is required");
       
       return saveIntegration(user.id, integrationName, integrationType, connectionFields);
     },
@@ -91,9 +94,16 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
       return;
     }
     
-    if (!integrationName) {
-      toast.error("Select an integration", {
-        description: "Please select an integration to connect."
+    if (!integrationType) {
+      toast.error("Select an integration type", {
+        description: "Please select an integration type."
+      });
+      return;
+    }
+    
+    if (!integrationName.trim()) {
+      toast.error("Enter integration name", {
+        description: "Please enter a name for this integration."
       });
       return;
     }
@@ -130,40 +140,25 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
             <Label>Integration Type</Label>
             <Select 
               value={integrationType} 
-              onValueChange={setIntegrationCategory}
+              onValueChange={setIntegrationType}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select integration type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="workflow">Workflow Automation</SelectItem>
-                <SelectItem value="communication">Communication</SelectItem>
-                <SelectItem value="crm">CRM</SelectItem>
-                <SelectItem value="payment">Payment Processing</SelectItem>
-                <SelectItem value="data">Data Management</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="workflow">Workflow</SelectItem>
+                <SelectItem value="agent">Agent</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div className="grid gap-2">
             <Label>Integration Name</Label>
-            <Select 
-              value={integrationName} 
-              onValueChange={setIntegrationType}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select integration" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(supportedIntegrations)
-                  .filter(([_, config]) => !integrationType || config.type === integrationType)
-                  .map(([name, _]) => (
-                    <SelectItem key={name} value={name}>{name}</SelectItem>
-                  ))
-                }
-              </SelectContent>
-            </Select>
+            <Input
+              placeholder="Enter integration name"
+              value={integrationName}
+              onChange={(e) => setIntegrationName(e.target.value)}
+            />
           </div>
           
           {integrationInfo && (
@@ -173,7 +168,7 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">{integrationName}</Badge>
+                        <Badge variant="outline">{integrationType}</Badge>
                         <span className="text-xs text-muted-foreground">Documentation</span>
                       </div>
                       <a 
@@ -192,7 +187,7 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Enter the credentials required to connect to {integrationName}.
+                  Enter the credentials required to connect to this integration.
                 </AlertDescription>
               </Alert>
               
@@ -231,3 +226,4 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
 };
 
 export default IntegrationConnectForm;
+

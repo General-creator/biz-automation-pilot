@@ -7,33 +7,15 @@ import { toast } from "sonner";
 import { Integration } from "@/types/integration";
 import { disconnectIntegration, reconnectIntegration } from "@/integrations/integration-service";
 
-// Helper function to get logo URL based on integration name
-const getIntegrationLogo = (name: string) => {
-  // This would ideally be replaced with actual logos
+// Helper function to get logo URL based on integration type
+const getIntegrationLogo = (type: string) => {
+  // Logo map based on integration type
   const logoMap: Record<string, string> = {
-    "Zapier": "https://cdn.zapier.com/zapier/images/logos/zapier-logo.svg",
-    "Make": "https://images.ctfassets.net/qqlj6g4ee76j/7HzRrlvRzl271CMotqRzPR/dd936ac36c125b5ca384e0316f7c8a31/Make-Symbol-Color.svg",
-    "HubSpot": "https://www.hubspot.com/hubfs/assets/hubspot.com/style-guide/brand-guidelines/guidelines_the-logo.svg",
-    "Stripe": "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg",
-    "Airtable": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Airtable_Logo.svg",
-    "Gmail": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg",
+    "workflow": "https://placehold.co/100x100?text=W",
+    "agent": "https://placehold.co/100x100?text=A",
   };
   
-  return logoMap[name] || "https://placehold.co/100x100?text=" + name.charAt(0);
-};
-
-// Helper function to categorize integrations
-const getCategoryForIntegration = (name: string) => {
-  const categoryMap: Record<string, string> = {
-    "Zapier": "workflow",
-    "Make": "workflow",
-    "HubSpot": "crm",
-    "Stripe": "payment",
-    "Airtable": "data",
-    "Gmail": "email",
-  };
-  
-  return categoryMap[name] || "other";
+  return logoMap[type] || "https://placehold.co/100x100?text=I";
 };
 
 export const useIntegrations = (propIntegrations?: any[]) => {
@@ -87,10 +69,10 @@ export const useIntegrations = (propIntegrations?: any[]) => {
       return integrationsData.map(integration => ({
         id: integration.id,
         name: integration.name,
-        logo: getIntegrationLogo(integration.name),
+        logo: getIntegrationLogo(integration.type),
         isConnected: integration.status === "connected",
         automationCount: automationCounts[integration.name] || 0,
-        category: getCategoryForIntegration(integration.name),
+        category: integration.type,
         type: integration.type,
         status: integration.status
       })) as Integration[];
@@ -189,10 +171,10 @@ export const useIntegrations = (propIntegrations?: any[]) => {
     reconnectIntegrationMutation.mutate(id);
   };
 
-  // Group integrations by category
+  // Group integrations by category (workflow, agent, etc.)
   const groupedIntegrations: Record<string, Integration[]> = {};
   integrations.forEach(integration => {
-    const category = integration.category;
+    const category = integration.type;
     if (!groupedIntegrations[category]) {
       groupedIntegrations[category] = [];
     }
