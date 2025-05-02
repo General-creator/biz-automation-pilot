@@ -121,11 +121,11 @@ const Workflows = () => {
         <div className="container max-w-6xl mx-auto px-4">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-orbit bg-clip-text text-transparent">Workflows</h1>
-              <p className="text-slate-600 mt-2">Connect and manage your business workflows</p>
+              <h1 className="text-3xl font-bold text-[#222222] drop-shadow-sm">Workflows</h1>
+              <p className="text-slate-700 mt-2 font-medium">Connect and manage your business workflows</p>
             </div>
             <Button 
-              className="flex items-center gap-2 bg-gradient-orbit hover:opacity-90 shadow-md"
+              className="flex items-center gap-2 bg-gradient-orbit text-white font-medium hover:opacity-90 shadow-md border border-[#4D7C79]/20"
               onClick={handleConnect}
             >
               <Plus className="h-4 w-4" />
@@ -136,16 +136,16 @@ const Workflows = () => {
           {workflows.length === 0 ? (
             <Card className="card-glass">
               <CardHeader>
-                <CardTitle className="text-[#4D7C79]">Your Workflows</CardTitle>
+                <CardTitle className="text-[#4D7C79] font-bold">Your Workflows</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center justify-center p-12 text-center">
-                  <p className="text-slate-600 text-lg">No workflows connected yet</p>
-                  <p className="text-slate-500 mt-2">
+                  <p className="text-slate-700 text-lg font-medium">No workflows connected yet</p>
+                  <p className="text-slate-600 mt-2">
                     Connect your first workflow to start managing it
                   </p>
                   <Button 
-                    className="mt-6 flex items-center gap-2 bg-gradient-orbit hover:opacity-90 shadow-md"
+                    className="mt-6 flex items-center gap-2 bg-gradient-orbit text-white font-medium hover:opacity-90 shadow-md border border-[#4D7C79]/20"
                     onClick={handleConnect}
                   >
                     <Plus className="h-4 w-4" />
@@ -172,14 +172,14 @@ const Workflows = () => {
       <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
         <DialogContent className="card-glass">
           <DialogHeader>
-            <DialogTitle className="text-[#4D7C79]">Connect Workflow</DialogTitle>
-            <DialogDescription className="text-slate-600">
+            <DialogTitle className="text-[#4D7C79] font-bold">Connect Workflow</DialogTitle>
+            <DialogDescription className="text-slate-700">
               Connect an existing workflow from your integrated platforms.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name" className="text-slate-700">Workflow Name</Label>
+              <Label htmlFor="name" className="text-slate-800 font-medium">Workflow Name</Label>
               <Input 
                 id="name" 
                 value={newWorkflow.name}
@@ -189,7 +189,7 @@ const Workflows = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description" className="text-slate-700">Description</Label>
+              <Label htmlFor="description" className="text-slate-800 font-medium">Description</Label>
               <Input 
                 id="description" 
                 value={newWorkflow.description}
@@ -199,7 +199,7 @@ const Workflows = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="platform" className="text-slate-700">Platform</Label>
+              <Label htmlFor="platform" className="text-slate-800 font-medium">Platform</Label>
               <Select 
                 onValueChange={(value) => setNewWorkflow({...newWorkflow, platform: value as Automation["platform"]})}
               >
@@ -218,10 +218,10 @@ const Workflows = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog} className="border-[#4D7C79] text-[#4D7C79] hover:bg-[#4D7C79]/10">Cancel</Button>
+            <Button variant="outline" onClick={handleCloseDialog} className="border-[#4D7C79] text-[#4D7C79] hover:bg-[#4D7C79]/10 font-medium">Cancel</Button>
             <Button 
               onClick={handleAddWorkflow}
-              className="bg-gradient-orbit hover:opacity-90"
+              className="bg-gradient-orbit text-white font-medium hover:opacity-90 shadow-sm border border-[#4D7C79]/20"
             >
               Connect Workflow
             </Button>
