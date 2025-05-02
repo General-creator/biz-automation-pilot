@@ -1,72 +1,30 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import Header from "@/components/Header";
 import AutomationCard, { Automation } from "@/components/AutomationCard";
 import ActivityLog, { ActivityItem } from "@/components/ActivityLog";
 import NotificationPanel, { Notification } from "@/components/NotificationPanel";
 import EmptyState from "@/components/EmptyState";
 import IntegrationsList from "@/components/IntegrationsList";
-import { CirclePlay, AlertTriangle } from "lucide-react";
+import { CirclePlay, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
-  // Sample data for automations
-  const [automations] = useState<Automation[]>([
-    {
-      id: "1",
-      name: "New Lead Follow-up",
-      description: "Send an email when a new lead is created in HubSpot",
-      platform: "Zapier",
-      status: "active",
-      lastRun: "Today, 2:30 PM",
-      nextRun: "Today, 6:30 PM",
-      runsToday: 12,
-      failedRuns: 0
-    },
-    {
-      id: "2",
-      name: "Invoice Paid Notification",
-      description: "Notify team when a new invoice is paid in Stripe",
-      platform: "Stripe",
-      status: "paused",
-      lastRun: "Yesterday, 5:45 PM",
-      runsToday: 3,
-      failedRuns: 0
-    },
-    {
-      id: "3",
-      name: "Weekly Report Generator",
-      description: "Generate weekly reports from Airtable data",
-      platform: "Airtable",
-      status: "failed",
-      lastRun: "Today, 9:00 AM",
-      runsToday: 1,
-      failedRuns: 1
-    },
-    {
-      id: "4",
-      name: "Customer Onboarding Sequence",
-      description: "Send onboarding emails to new customers",
-      platform: "HubSpot",
-      status: "active",
-      lastRun: "Today, 3:15 PM",
-      nextRun: "Today, 7:15 PM",
-      runsToday: 5,
-      failedRuns: 0
-    },
-    {
-      id: "5",
-      name: "Support Ticket Alerts",
-      description: "Send alerts for high priority support tickets",
-      platform: "Make",
-      status: "active",
-      lastRun: "Today, 4:20 PM",
-      nextRun: "Today, 8:20 PM",
-      runsToday: 8,
-      failedRuns: 0
-    }
-  ]);
+  const { user } = useAuth();
+  const [automations, setAutomations] = useState<Automation[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newAutomation, setNewAutomation] = useState({
+    name: "",
+    description: "",
+    platform: "Zapier" as Automation["platform"]
+  });
 
   // Sample data for activities
   const [activities] = useState<ActivityItem[]>([
@@ -182,9 +140,67 @@ const Index = () => {
     }
   ] as any);
 
+  // Load automations from localStorage for this specific user
+  useEffect(() => {
+    if (user) {
+      const storedAutomations = localStorage.getItem(`automations-${user.id}`);
+      if (storedAutomations) {
+        setAutomations(JSON.parse(storedAutomations));
+      } else {
+        // First login for this user, start with empty automations
+        setAutomations([]);
+      }
+    }
+  }, [user]);
+
+  // Save automations to localStorage whenever they change
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(`automations-${user.id}`, JSON.stringify(automations));
+    }
+  }, [automations, user]);
+
   const handleConnectIntegration = () => {
     toast("Connect a new integration", {
       description: "Select from our available integrations to automate your workflows.",
+    });
+  };
+
+  const handleCreateAutomation = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveAutomation = () => {
+    if (!newAutomation.name || !newAutomation.description) {
+      toast("Please fill in all required fields", {
+        description: "Automation name and description are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newAutomationItem: Automation = {
+      id: `automation-${Date.now()}`,
+      name: newAutomation.name,
+      description: newAutomation.description,
+      platform: newAutomation.platform,
+      status: "active",
+      lastRun: "Just now",
+      nextRun: "In 4 hours",
+      runsToday: 0,
+      failedRuns: 0
+    };
+
+    setAutomations([...automations, newAutomationItem]);
+    setIsDialogOpen(false);
+    setNewAutomation({
+      name: "",
+      description: "",
+      platform: "Zapier"
+    });
+
+    toast("Automation created", {
+      description: "Your new automation has been successfully created.",
     });
   };
 
@@ -202,11 +218,16 @@ const Index = () => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-6">
           <div className="md:col-span-4">
             <Tabs defaultValue="automations" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="automations">Automations</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
-                <TabsTrigger value="integrations">Integrations</TabsTrigger>
-              </TabsList>
+              <div className="flex justify-between items-center">
+                <TabsList>
+                  <TabsTrigger value="automations">Automations</TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                  <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                </TabsList>
+                <Button onClick={handleCreateAutomation} size="sm">
+                  <Plus className="h-4 w-4 mr-1" /> New Automation
+                </Button>
+              </div>
               <TabsContent value="automations" className="space-y-6">
                 {automations.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -218,8 +239,8 @@ const Index = () => {
                   <EmptyState
                     title="No automations yet"
                     description="Connect your first integration to start creating automations."
-                    actionText="Connect Integration"
-                    onAction={handleConnectIntegration}
+                    actionText="Create Automation"
+                    onAction={handleCreateAutomation}
                     icon={<CirclePlay className="h-6 w-6" />}
                   />
                 )}
@@ -237,6 +258,72 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Automation</DialogTitle>
+            <DialogDescription>
+              Fill in the details below to create a new automation workflow.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Automation Name</Label>
+              <Input
+                id="name"
+                placeholder="E.g., New Lead Follow-up"
+                value={newAutomation.name}
+                onChange={(e) => setNewAutomation({...newAutomation, name: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                placeholder="Briefly describe what this automation does"
+                value={newAutomation.description}
+                onChange={(e) => setNewAutomation({...newAutomation, description: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="platform">Platform</Label>
+              <Select 
+                value={newAutomation.platform} 
+                onValueChange={(value) => setNewAutomation({
+                  ...newAutomation, 
+                  platform: value as Automation["platform"]
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Zapier">Zapier</SelectItem>
+                  <SelectItem value="Make">Make (Integromat)</SelectItem>
+                  <SelectItem value="HubSpot">HubSpot</SelectItem>
+                  <SelectItem value="Stripe">Stripe</SelectItem>
+                  <SelectItem value="Airtable">Airtable</SelectItem>
+                  <SelectItem value="Gmail">Gmail</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveAutomation}>
+              Create Automation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <footer className="border-t bg-white py-4">
         <div className="container flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
