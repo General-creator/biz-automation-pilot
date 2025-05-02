@@ -52,10 +52,14 @@ const sampleAutomations = [
 const Automations = () => {
   const [automations, setAutomations] = useState<Automation[]>(sampleAutomations);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
-  const [newAutomation, setNewAutomation] = useState({
+  const [newAutomation, setNewAutomation] = useState<{
+    name: string;
+    description: string;
+    platform: Automation["platform"] | "";
+  }>({
     name: "",
     description: "",
-    platform: "" as Automation["platform"] | "",
+    platform: "",
   });
 
   const handleConnect = () => {
@@ -85,8 +89,8 @@ const Automations = () => {
       id: newId,
       name: newAutomation.name,
       description: newAutomation.description,
-      platform: newAutomation.platform as Automation["platform"],
-      connectedPlatforms: [] as Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">,
+      platform: newAutomation.platform,
+      connectedPlatforms: [],
       status: "active",
       last_run: new Date().toISOString(),
       next_run: new Date(Date.now() + 86400000).toISOString(),

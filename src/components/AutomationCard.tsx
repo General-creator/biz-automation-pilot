@@ -36,93 +36,57 @@ const AutomationCard = ({ automation, onConfigure, onUpdate }: AutomationCardPro
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  // Update automation status mutation
-  const updateStatusMutation = useMutation({
-    mutationFn: async (newStatus: "active" | "paused" | "failed") => {
-      const { data, error } = await supabase
-        .from("automations")
-        .update({ status: newStatus })
-        .eq("id", automation.id)
-        .select();
-      
-      if (error) throw error;
-      return data[0];
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["automations"] });
-      toast(
-        data.status === "active" ? "Automation activated" : "Automation paused", 
-        { description: `${automation.name} has been ${data.status === "active" ? "activated" : "paused"}.` }
-      );
-    },
-    onError: (error) => {
-      toast("Failed to update automation status", {
-        description: error.message,
-      });
-      // Revert UI to previous state
-      setStatus(automation.status);
-    }
-  });
-
-  // Create activity record mutation
-  const createActivityMutation = useMutation({
-    mutationFn: async (activity: {
-      automation_id: string,
-      automation_name: string,
-      platform: string,
-      status: string,
-      message: string
-    }) => {
-      const { data, error } = await supabase
-        .from("activities")
-        .insert({
-          user_id: (await supabase.auth.getUser()).data.user?.id,
-          automation_id: activity.automation_id,
-          automation_name: activity.automation_name,
-          platform: activity.platform,
-          status: activity.status,
-          message: activity.message
-        })
-        .select();
-      
-      if (error) throw error;
-      return data[0];
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
-    }
-  });
-
+  // Toggle automation status (active/paused)
   const handleToggle = () => {
+    if (isLoading || status === "failed") return;
+    
     setIsLoading(true);
     const newStatus = status === "active" ? "paused" : "active";
-    setStatus(newStatus); // Optimistic update
     
-    updateStatusMutation.mutate(newStatus, {
-      onSettled: () => {
-        setIsLoading(false);
+    // Optimistic update
+    setStatus(newStatus);
+    
+    // In a real app, this would be an API call
+    setTimeout(() => {
+      if (onUpdate) {
+        const updatedAutomation = {
+          ...automation,
+          status: newStatus,
+          last_run: new Date().toISOString()
+        };
+        onUpdate(updatedAutomation);
       }
-    });
+      
+      setIsLoading(false);
+      toast(
+        newStatus === "active" ? "Automation activated" : "Automation paused",
+        { description: `${automation.name} has been ${newStatus === "active" ? "activated" : "paused"}.` }
+      );
+    }, 500);
   };
 
+  // Run automation manually
   const handleRunNow = () => {
+    if (isLoading) return;
+    
     setIsLoading(true);
     
-    // Record activity
-    createActivityMutation.mutate({
-      automation_id: automation.id,
-      automation_name: automation.name,
-      platform: automation.platform,
-      status: "success",
-      message: "Manual execution triggered by user"
-    }, {
-      onSettled: () => {
-        setIsLoading(false);
-        toast("Automation triggered", {
-          description: `${automation.name} has been manually triggered.`
-        });
+    // In a real app, this would be an API call
+    setTimeout(() => {
+      if (onUpdate) {
+        const updatedAutomation = {
+          ...automation,
+          last_run: new Date().toISOString(),
+          runs_today: automation.runs_today + 1
+        };
+        onUpdate(updatedAutomation);
       }
-    });
+      
+      setIsLoading(false);
+      toast("Automation triggered", {
+        description: `${automation.name} has been manually triggered.`
+      });
+    }, 500);
   };
 
   const handleConfigure = () => {
