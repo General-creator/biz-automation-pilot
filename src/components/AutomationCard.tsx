@@ -49,7 +49,7 @@ const AutomationCard = ({ automation, onConfigure, onUpdate }: AutomationCardPro
     // In a real app, this would be an API call
     setTimeout(() => {
       if (onUpdate) {
-        const updatedAutomation = {
+        const updatedAutomation: Automation = {
           ...automation,
           status: newStatus,
           last_run: new Date().toISOString()
@@ -74,7 +74,7 @@ const AutomationCard = ({ automation, onConfigure, onUpdate }: AutomationCardPro
     // In a real app, this would be an API call
     setTimeout(() => {
       if (onUpdate) {
-        const updatedAutomation = {
+        const updatedAutomation: Automation = {
           ...automation,
           last_run: new Date().toISOString(),
           runs_today: automation.runs_today + 1
