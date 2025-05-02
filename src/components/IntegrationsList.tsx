@@ -50,35 +50,37 @@ const IntegrationsList = ({ integrations }: IntegrationsListProps) => {
         <CardTitle>Available Integrations</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {integrations.map((integration) => (
             <div
               key={integration.id}
-              className="flex items-center justify-between rounded-lg border bg-card p-4 shadow-sm"
+              className="rounded-lg border bg-card p-4 shadow-sm"
             >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded overflow-hidden flex items-center justify-center bg-muted">
-                  <img
-                    src={integration.logo}
-                    alt={integration.name}
-                    className="h-6 w-6 object-contain"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-medium">{integration.name}</h3>
-                  <div className="mt-1 flex items-center gap-2">
-                    {getCategoryBadge(integration.category)}
-                    {integration.isConnected && (
-                      <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-                        Connected
-                      </Badge>
-                    )}
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded overflow-hidden flex items-center justify-center bg-muted">
+                    <img
+                      src={integration.logo}
+                      alt={integration.name}
+                      className="h-6 w-6 object-contain"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">{integration.name}</h3>
+                    <div className="mt-1 flex items-center gap-2">
+                      {getCategoryBadge(integration.category)}
+                      {integration.isConnected && (
+                        <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+                          Connected
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="mt-4">
                 {integration.isConnected ? (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-xs text-muted-foreground">
                     {integration.automationCount} automation
                     {integration.automationCount !== 1 ? "s" : ""} connected
                   </div>
@@ -86,6 +88,7 @@ const IntegrationsList = ({ integrations }: IntegrationsListProps) => {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="w-full"
                     onClick={() => handleConnect(integration)}
                   >
                     Connect
