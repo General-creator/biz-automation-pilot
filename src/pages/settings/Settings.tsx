@@ -30,7 +30,7 @@ const Settings = () => {
                 <p className="text-muted-foreground mb-4">
                   Manage your profile information and account settings
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild variant="orbit" className="w-full">
                   <Link to="/settings/profile">Go to Profile</Link>
                 </Button>
               </CardContent>
@@ -46,7 +46,7 @@ const Settings = () => {
                 <p className="text-muted-foreground mb-4">
                   View and update your account information
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild variant="orbit" className="w-full">
                   <Link to="/settings/account">Go to Account</Link>
                 </Button>
               </CardContent>
@@ -62,7 +62,7 @@ const Settings = () => {
                 <p className="text-muted-foreground mb-4">
                   Manage your subscription and payment methods
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild variant="orbit" className="w-full">
                   <Link to="/settings/billing">Go to Billing</Link>
                 </Button>
               </CardContent>
@@ -78,7 +78,7 @@ const Settings = () => {
                 <p className="text-muted-foreground mb-4">
                   Connect and manage your third-party integrations
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild variant="orbit" className="w-full">
                   <Link to="/settings/integrations">Go to Integrations</Link>
                 </Button>
               </CardContent>
@@ -94,7 +94,7 @@ const Settings = () => {
                 <p className="text-muted-foreground mb-4">
                   View analytics and statistics for your automations
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild variant="orbit" className="w-full">
                   <Link to="/settings/analytics">Go to Analytics</Link>
                 </Button>
               </CardContent>
@@ -110,7 +110,7 @@ const Settings = () => {
                 <p className="text-muted-foreground mb-4">
                   Get help and support for using the platform
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild variant="orbit" className="w-full">
                   <Link to="/settings/help">Go to Help</Link>
                 </Button>
               </CardContent>
