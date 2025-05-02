@@ -6,6 +6,10 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import AutomationCard from "@/components/AutomationCard";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Sample automation data
 const sampleAutomations = [
@@ -48,12 +52,64 @@ const sampleAutomations = [
 const Automations = () => {
   const [automations, setAutomations] = useState(sampleAutomations);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
+  const [newAutomation, setNewAutomation] = useState({
+    name: "",
+    description: "",
+    platform: "" as Automation["platform"] | "",
+  });
 
   const handleConnect = () => {
     setShowConnectDialog(true);
-    toast("Coming Soon", {
-      description: "Connecting new automations will be available in the next update."
+  };
+
+  const handleCloseDialog = () => {
+    setShowConnectDialog(false);
+    setNewAutomation({
+      name: "",
+      description: "",
+      platform: "",
     });
+  };
+
+  const handleAddAutomation = () => {
+    if (!newAutomation.name || !newAutomation.description || !newAutomation.platform) {
+      toast("Please fill all fields", {
+        description: "All fields are required to connect a new automation."
+      });
+      return;
+    }
+
+    const newId = (automations.length + 1).toString();
+    
+    const addedAutomation = {
+      id: newId,
+      name: newAutomation.name,
+      description: newAutomation.description,
+      platform: newAutomation.platform as Automation["platform"],
+      connectedPlatforms: [] as Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">,
+      status: "active" as const,
+      last_run: new Date().toISOString(),
+      next_run: new Date(Date.now() + 86400000).toISOString(),
+      runs_today: 0,
+      failed_runs: 0
+    };
+    
+    setAutomations([...automations, addedAutomation]);
+    handleCloseDialog();
+    
+    toast("Automation Connected", {
+      description: `${newAutomation.name} has been successfully connected.`
+    });
+  };
+
+  const handleConfigureAutomation = (id: string) => {
+    const automation = automations.find(a => a.id === id);
+    
+    if (automation) {
+      toast("Configure Automation", {
+        description: `Configuring ${automation.name}. Full configuration options will be available in the next update.`
+      });
+    }
   };
 
   return (
@@ -92,13 +148,68 @@ const Automations = () => {
               {automations.map((automation) => (
                 <AutomationCard 
                   key={automation.id} 
-                  automation={automation}
+                  automation={automation} 
+                  onConfigure={() => handleConfigureAutomation(automation.id)}
                 />
               ))}
             </div>
           )}
         </div>
       </main>
+
+      {/* Connect Automation Dialog */}
+      <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Connect Automation</DialogTitle>
+            <DialogDescription>
+              Connect an existing automation from your integrated platforms.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Automation Name</Label>
+              <Input 
+                id="name" 
+                value={newAutomation.name}
+                onChange={(e) => setNewAutomation({...newAutomation, name: e.target.value})}
+                placeholder="Enter automation name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Input 
+                id="description" 
+                value={newAutomation.description}
+                onChange={(e) => setNewAutomation({...newAutomation, description: e.target.value})}
+                placeholder="Describe what this automation does"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="platform">Platform</Label>
+              <Select 
+                onValueChange={(value) => setNewAutomation({...newAutomation, platform: value as Automation["platform"]})}
+              >
+                <SelectTrigger id="platform">
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Zapier">Zapier</SelectItem>
+                  <SelectItem value="Make">Make</SelectItem>
+                  <SelectItem value="HubSpot">HubSpot</SelectItem>
+                  <SelectItem value="Stripe">Stripe</SelectItem>
+                  <SelectItem value="Airtable">Airtable</SelectItem>
+                  <SelectItem value="Gmail">Gmail</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={handleAddAutomation}>Connect Automation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

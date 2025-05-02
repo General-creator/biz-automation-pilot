@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -25,9 +24,10 @@ export interface Automation {
 
 interface AutomationCardProps {
   automation: Automation;
+  onConfigure?: (id: string) => void;
 }
 
-const AutomationCard = ({ automation }: AutomationCardProps) => {
+const AutomationCard = ({ automation, onConfigure }: AutomationCardProps) => {
   const [status, setStatus] = useState<"active" | "paused" | "failed">(automation.status);
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
@@ -119,6 +119,12 @@ const AutomationCard = ({ automation }: AutomationCardProps) => {
         });
       }
     });
+  };
+
+  const handleConfigure = () => {
+    if (onConfigure) {
+      onConfigure(automation.id);
+    }
   };
 
   const getPlatformBadge = (platform: Automation["platform"]) => {
@@ -226,7 +232,11 @@ const AutomationCard = ({ automation }: AutomationCardProps) => {
           </div>
         </div>
         <div className="flex justify-between mt-4">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleConfigure}
+          >
             <Settings className="h-4 w-4 mr-1" />
             Configure
           </Button>
