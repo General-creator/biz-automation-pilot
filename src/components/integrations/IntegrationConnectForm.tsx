@@ -1,16 +1,8 @@
 
-import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { saveIntegration, ConnectionData, reconnectIntegration as reconnectIntegrationService } from "@/integrations/integration-service";
 import { Form } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { IntegrationFormValues, integrationFormSchema, IntegrationInfo } from "./forms/integration-form-types";
+import { IntegrationFormValues } from "./forms/integration-form-types";
 import IntegrationTypeSelect from "./forms/IntegrationTypeSelect";
 import IntegrationNameInput from "./forms/IntegrationNameInput";
 import AuthTypeTabs from "./forms/AuthTypeTabs";
@@ -18,6 +10,8 @@ import IntegrationDocumentation from "./forms/IntegrationDocumentation";
 import ConnectionHelpAlert from "./forms/ConnectionHelpAlert";
 import IntegrationFormActions from "./forms/IntegrationFormActions";
 import { Integration } from "@/types/integration";
+import { useIntegrationForm } from "@/hooks/useIntegrationForm";
+import AuthenticationFields from "./forms/AuthenticationFields";
 
 interface IntegrationConnectFormProps {
   isOpen: boolean;
@@ -31,149 +25,21 @@ const IntegrationConnectForm = ({
   reconnectIntegration 
 }: IntegrationConnectFormProps) => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [authType, setAuthType] = useState<"api_key" | "oauth">("api_key");
-  const [integrationInfo, setIntegrationInfo] = useState<IntegrationInfo | null>(null);
-  const isReconnecting = !!reconnectIntegration;
   
-  const form = useForm<IntegrationFormValues>({
-    resolver: zodResolver(integrationFormSchema),
-    defaultValues: {
-      integrationName: "",
-      integrationType: "",
-      authType: "api_key",
-      apiKey: "",
-      apiSecret: "",
-      clientId: "",
-      clientSecret: ""
-    }
+  const { 
+    form, 
+    authType, 
+    setAuthType, 
+    integrationInfo, 
+    onSubmit, 
+    isReconnecting,
+    isPending
+  } = useIntegrationForm({
+    isOpen,
+    onClose,
+    reconnectIntegration,
+    userId: user?.id || null
   });
-  
-  // Set form values when reconnecting
-  useEffect(() => {
-    if (isOpen && reconnectIntegration) {
-      form.reset({
-        integrationName: reconnectIntegration.name,
-        integrationType: reconnectIntegration.type,
-        authType: "api_key", // Default to API key, actual auth type needs to be retrieved from backend
-        apiKey: "",
-        apiSecret: "",
-        clientId: "",
-        clientSecret: ""
-      });
-    }
-  }, [isOpen, reconnectIntegration, form]);
-  
-  // Reset form when closed
-  useEffect(() => {
-    if (!isOpen) {
-      form.reset();
-      setIntegrationInfo(null);
-    }
-  }, [isOpen, form]);
-  
-  // Update required fields based on connection type 
-  useEffect(() => {
-    const integrationType = form.watch("integrationType");
-    if (integrationType) {
-      // Default fields for connections based on type
-      let fields: string[] = [];
-      let documentation = "";
-      
-      if (integrationType === "workflow") {
-        fields = ["api_key"];
-        documentation = "https://docs.lovable.dev/integrations/workflows";
-      } else if (integrationType === "agent") {
-        fields = ["api_key"];
-        documentation = "https://docs.lovable.dev/integrations/agents";
-      }
-      
-      setIntegrationInfo({
-        fields,
-        documentation
-      });
-    } else {
-      setIntegrationInfo(null);
-    }
-  }, [form.watch("integrationType")]);
-  
-  const connectMutation = useMutation({
-    mutationFn: async (values: IntegrationFormValues) => {
-      if (!user) throw new Error("User not authenticated");
-      
-      // Build connection data based on auth type
-      const connectionData: ConnectionData = {};
-      
-      if (values.authType === "api_key") {
-        if (values.apiKey) connectionData.api_key = values.apiKey;
-        if (values.apiSecret) connectionData.api_secret = values.apiSecret;
-      } else if (values.authType === "oauth") {
-        if (values.clientId) connectionData.client_id = values.clientId;
-        if (values.clientSecret) connectionData.client_secret = values.clientSecret;
-      }
-      
-      return saveIntegration(user.id, values.integrationName, values.integrationType, connectionData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
-      onClose();
-      toast.success("Integration connected successfully");
-    },
-    onError: (error: Error) => {
-      toast.error("Connection failed", {
-        description: error.message
-      });
-    }
-  });
-  
-  // Reconnect mutation - renamed the imported function to avoid name collision
-  const reconnectMutation = useMutation({
-    mutationFn: async (data: { values: IntegrationFormValues; integrationId: string }) => {
-      if (!user) throw new Error("User not authenticated");
-      
-      // Build connection data based on auth type
-      const connectionData: ConnectionData = {};
-      const values = data.values;
-      
-      if (values.authType === "api_key") {
-        if (values.apiKey) connectionData.api_key = values.apiKey;
-        if (values.apiSecret) connectionData.api_secret = values.apiSecret;
-      } else if (values.authType === "oauth") {
-        if (values.clientId) connectionData.client_id = values.clientId;
-        if (values.clientSecret) connectionData.client_secret = values.clientSecret;
-      }
-      
-      return reconnectIntegrationService(data.integrationId, connectionData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
-      onClose();
-      toast.success("Integration reconnected successfully");
-    },
-    onError: (error: Error) => {
-      toast.error("Reconnection failed", {
-        description: error.message
-      });
-    }
-  });
-  
-  const onSubmit = (values: IntegrationFormValues) => {
-    if (!user) {
-      toast.error("Authentication required", {
-        description: "You must be logged in to connect an integration."
-      });
-      return;
-    }
-    
-    if (isReconnecting && reconnectIntegration) {
-      reconnectMutation.mutate({ 
-        values: values, 
-        integrationId: reconnectIntegration.id 
-      });
-    } else {
-      connectMutation.mutate(values);
-    }
-  };
   
   return (
     <Dialog open={isOpen} onOpenChange={open => {
@@ -206,6 +72,11 @@ const IntegrationConnectForm = ({
               setAuthType={setAuthType}
             />
             
+            <AuthenticationFields 
+              control={form.control} 
+              authType={authType} 
+            />
+            
             {integrationInfo?.documentation && (
               <IntegrationDocumentation 
                 integrationType={form.watch("integrationType")} 
@@ -217,7 +88,7 @@ const IntegrationConnectForm = ({
             
             <IntegrationFormActions
               onCancel={onClose}
-              isPending={connectMutation.isPending || reconnectMutation.isPending}
+              isPending={isPending}
               isReconnecting={isReconnecting}
             />
           </form>
