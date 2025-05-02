@@ -6,6 +6,7 @@ import EmptyIntegrationsState from "./integrations/EmptyIntegrationsState";
 import { useIntegrations } from "@/hooks/useIntegrations";
 import IntegrationConnectForm from "./integrations/IntegrationConnectForm";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface IntegrationsListProps {
   integrations?: any[];
@@ -22,6 +23,20 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
     isDisconnectLoading,
     isReconnectLoading,
   } = useIntegrations(propIntegrations);
+
+  // Handle disconnect click for integrations in the home page
+  const handleHomePageDisconnect = (id: string) => {
+    toast("Feature in progress", {
+      description: "The disconnect action from the homepage is not yet available. Please use the integrations settings page.",
+    });
+  };
+
+  // Handle reconnect click for integrations in the home page
+  const handleHomePageReconnect = (id: string) => {
+    toast("Feature in progress", {
+      description: "The reconnect action from the homepage is not yet available. Please use the integrations settings page.",
+    });
+  };
   
   if (isLoading && !propIntegrations) {
     return (
@@ -53,8 +68,8 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
                   key={category}
                   category={category === "workflow" ? "Workflow" : category === "agent" ? "Agent" : category}
                   integrations={items}
-                  onDisconnect={handleDisconnect}
-                  onReconnect={handleReconnect}
+                  onDisconnect={propIntegrations ? handleHomePageDisconnect : handleDisconnect}
+                  onReconnect={propIntegrations ? handleHomePageReconnect : handleReconnect}
                   isLoading={isDisconnectLoading || isReconnectLoading}
                 />
               ))}

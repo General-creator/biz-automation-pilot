@@ -140,55 +140,47 @@ const Index = () => {
     }
   ]);
 
-  // Sample data for integrations
+  // Updated integrations data to properly reflect connection status
   const [integrations] = useState([
     {
       id: "1",
       name: "Zapier",
       logo: "https://cdn.zapier.com/zapier/images/logos/zapier-logo.svg",
-      isConnected: true,
-      automationCount: 2,
-      category: "workflow"
+      isConnected: false,
+      automationCount: 0,
+      category: "workflow",
+      type: "workflow",
+      status: "disconnected"
     },
     {
       id: "2",
       name: "Make (Integromat)",
       logo: "https://images.ctfassets.net/qqlj6g4ee76j/7HzRrlvRzl271CMotqRjPR/dd936ac36c125b5ca384e0316f7c8a31/Make-Symbol-Color.svg",
-      isConnected: true,
-      automationCount: 1,
-      category: "workflow"
+      isConnected: false,
+      automationCount: 0,
+      category: "workflow",
+      type: "workflow",
+      status: "disconnected"
     },
     {
       id: "3",
       name: "HubSpot",
       logo: "https://www.hubspot.com/hubfs/assets/hubspot.com/style-guide/brand-guidelines/guidelines_the-logo.svg",
-      isConnected: true,
-      automationCount: 1,
-      category: "crm"
+      isConnected: false,
+      automationCount: 0,
+      category: "crm",
+      type: "crm",
+      status: "disconnected"
     },
     {
       id: "4",
       name: "Stripe",
       logo: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg",
-      isConnected: true,
-      automationCount: 1,
-      category: "payment"
-    },
-    {
-      id: "5",
-      name: "Airtable",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Airtable_Logo.svg",
-      isConnected: true,
-      automationCount: 1,
-      category: "data"
-    },
-    {
-      id: "6",
-      name: "Gmail",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg",
       isConnected: false,
       automationCount: 0,
-      category: "email"
+      category: "payment",
+      type: "payment",
+      status: "disconnected"
     }
   ] as any);
 
@@ -331,8 +323,6 @@ const Index = () => {
                   <SelectItem value="Make">Make (Integromat)</SelectItem>
                   <SelectItem value="HubSpot">HubSpot</SelectItem>
                   <SelectItem value="Stripe">Stripe</SelectItem>
-                  <SelectItem value="Airtable">Airtable</SelectItem>
-                  <SelectItem value="Gmail">Gmail</SelectItem>
                 </SelectContent>
               </Select>
             </div>
