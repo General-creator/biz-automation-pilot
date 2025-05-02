@@ -15,11 +15,15 @@ export interface ActivityItem {
   message: string;
 }
 
-const ActivityLog = () => {
+interface ActivityLogProps {
+  activities?: ActivityItem[];
+}
+
+const ActivityLog = ({ activities: propActivities }: ActivityLogProps) => {
   const { user } = useAuth();
 
-  // Fetch activities from Supabase
-  const { data: activities = [], isLoading } = useQuery({
+  // Fetch activities from Supabase if not provided as props
+  const { data: fetchedActivities = [], isLoading } = useQuery({
     queryKey: ["activities"],
     queryFn: async () => {
       if (!user) return [];
@@ -46,8 +50,11 @@ const ActivityLog = () => {
         message: activity.message || ""
       })) as ActivityItem[];
     },
-    enabled: !!user
+    enabled: !!user && !propActivities
   });
+
+  // Use prop activities if provided, otherwise use fetched activities
+  const activities = propActivities || fetchedActivities;
 
   const getStatusIcon = (status: "success" | "failure") => {
     return status === "success" ? (
@@ -63,7 +70,7 @@ const ActivityLog = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && !propActivities) {
     return (
       <Card>
         <CardHeader>
