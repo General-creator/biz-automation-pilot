@@ -125,7 +125,7 @@ const Workflows = () => {
               <p className="text-slate-700 mt-2 font-medium">Connect and manage your business workflows</p>
             </div>
             <Button 
-              className="flex items-center gap-2 bg-gradient-orbit text-white font-medium hover:opacity-90 shadow-md border border-[#4D7C79]/20"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28] shadow-md"
               onClick={handleConnect}
             >
               <Plus className="h-4 w-4" />
@@ -145,7 +145,7 @@ const Workflows = () => {
                     Connect your first workflow to start managing it
                   </p>
                   <Button 
-                    className="mt-6 flex items-center gap-2 bg-gradient-orbit text-white font-medium hover:opacity-90 shadow-md border border-[#4D7C79]/20"
+                    className="mt-6 flex items-center gap-2 bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28] shadow-md"
                     onClick={handleConnect}
                   >
                     <Plus className="h-4 w-4" />
@@ -218,10 +218,10 @@ const Workflows = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog} className="border-[#4D7C79] text-[#4D7C79] hover:bg-[#4D7C79]/10 font-medium">Cancel</Button>
+            <Button variant="outline" onClick={handleCloseDialog} className="border-slate-300 text-slate-700 hover:bg-slate-100">Cancel</Button>
             <Button 
               onClick={handleAddWorkflow}
-              className="bg-gradient-orbit text-white font-medium hover:opacity-90 shadow-sm border border-[#4D7C79]/20"
+              className="bg-gradient-to-r from-[#4D7C79] to-[#D94A38] hover:from-[#426C69] hover:to-[#C43A28]"
             >
               Connect Workflow
             </Button>
