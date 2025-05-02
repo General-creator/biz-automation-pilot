@@ -126,13 +126,14 @@ const IntegrationConnectForm = ({
     }
   });
   
-  // Reconnect mutation
+  // Reconnect mutation - fixed to avoid type errors
   const reconnectMutation = useMutation({
-    mutationFn: async (values: IntegrationFormValues & { id: string }) => {
+    mutationFn: async (data: { values: IntegrationFormValues; integrationId: string }) => {
       if (!user) throw new Error("User not authenticated");
       
       // Build connection data based on auth type
       const connectionData: ConnectionData = {};
+      const values = data.values;
       
       if (values.authType === "api_key") {
         if (values.apiKey) connectionData.api_key = values.apiKey;
@@ -142,7 +143,7 @@ const IntegrationConnectForm = ({
         if (values.clientSecret) connectionData.client_secret = values.clientSecret;
       }
       
-      return reconnectIntegration(values.id, connectionData);
+      return reconnectIntegration(data.integrationId, connectionData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["integrations"] });
@@ -165,8 +166,11 @@ const IntegrationConnectForm = ({
     }
     
     if (isReconnecting && reconnectIntegration) {
-      // Fix: Pass the integration ID directly rather than calling it as a function
-      reconnectMutation.mutate({ ...values, id: reconnectIntegration.id });
+      // Fixed: Pass the integration ID as a separate parameter
+      reconnectMutation.mutate({ 
+        values: values, 
+        integrationId: reconnectIntegration.id 
+      });
     } else {
       connectMutation.mutate(values);
     }
