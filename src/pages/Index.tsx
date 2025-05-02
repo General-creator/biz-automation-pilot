@@ -218,7 +218,7 @@ const Index = () => {
       <Header />
       <main className="flex-1 container py-6">
         <div className="mb-6">
-          <h2 className="text-3xl font-bold tracking-tight">Welcome to AutoPilot</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Welcome to Orbit</h2>
           <p className="text-muted-foreground mt-2">
             Manage and monitor all your business automations in one place.
           </p>
@@ -349,7 +349,7 @@ const Index = () => {
       <footer className="border-t bg-white py-4">
         <div className="container flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            &copy; 2025 AutoPilot. All rights reserved.
+            &copy; 2025 Orbit. All rights reserved.
           </p>
           <div className="flex items-center text-sm text-muted-foreground">
             <span className="inline-flex items-center mr-4">

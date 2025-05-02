@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,8 @@ const Header = () => {
   // Just one welcome notification
   const welcomeNotification: Notification = {
     id: "welcome",
-    automationName: "Automator",
-    message: "Welcome to Automator! Get started by exploring our features.",
+    automationName: "Orbit",
+    message: "Welcome to Orbit! Get started by exploring our features.",
     timestamp: new Date().toLocaleString(),
     severity: "low" as const
   };
@@ -85,7 +86,7 @@ const Header = () => {
               to="/dashboard"
               className="flex items-center gap-2 text-lg font-semibold"
             >
-              <span className="font-bold">Automator</span>
+              <span className="font-bold">Orbit</span>
             </Link>
             <Link
               to="/dashboard"
@@ -116,7 +117,7 @@ const Header = () => {
       </Sheet>
       <div className="flex items-center gap-2">
         <Link to="/" className="flex items-center gap-2 font-semibold">
-          <span className="hidden font-bold md:inline-block">Automator</span>
+          <span className="hidden font-bold md:inline-block">Orbit</span>
         </Link>
       </div>
       <nav className="hidden flex-1 items-center gap-6 md:flex">
