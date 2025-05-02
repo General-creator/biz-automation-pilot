@@ -19,7 +19,7 @@ import {
 import { Loader2 } from "lucide-react";
 
 const Profile = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [username, setUsername] = useState(profile?.username || user?.email?.split('@')[0] || "");
@@ -76,16 +76,18 @@ const Profile = () => {
         if (profileError) throw profileError;
       }
       
-      toast("Avatar updated", {
+      // Update the profile in context too
+      await refreshProfile();
+      
+      toast.success("Avatar updated", {
         description: "Your profile picture has been updated successfully.",
       });
       
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Error uploading avatar:", error);
-      toast("Upload failed", {
+      toast.error("Upload failed", {
         description: "There was a problem uploading your avatar. Please try again.",
-        variant: "destructive",
       });
     } finally {
       setIsUploading(false);
@@ -108,16 +110,18 @@ const Profile = () => {
           .eq('id', user.id);
           
         if (error) throw error;
+        
+        // Update the profile in context too
+        await refreshProfile();
       }
       
-      toast("Profile updated", {
+      toast.success("Profile updated", {
         description: "Your profile has been successfully updated.",
       });
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast("Update failed", {
+      toast.error("Update failed", {
         description: "There was a problem updating your profile. Please try again.",
-        variant: "destructive",
       });
     }
   };
