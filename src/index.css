@@ -88,3 +88,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom styles for the application */
+@layer components {
+  .stats-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+  }
+  
+  .dashboard-container {
+    @apply container mx-auto py-6 px-4 sm:px-6;
+  }
+  
+  .card-hover-effect {
+    @apply transition-all duration-200 hover:shadow-md hover:border-primary/30;
+  }
+  
+  .sidebar-nav-item {
+    @apply flex items-center space-x-2 p-2 rounded-md hover:bg-accent transition-colors;
+  }
+}
