@@ -102,14 +102,12 @@ const Automations = () => {
     });
   };
 
-  const handleConfigureAutomation = (id: string) => {
-    const automation = automations.find(a => a.id === id);
+  const handleUpdateAutomation = (updatedAutomation: Automation) => {
+    const updatedAutomations = automations.map(automation => 
+      automation.id === updatedAutomation.id ? updatedAutomation : automation
+    );
     
-    if (automation) {
-      toast("Configure Automation", {
-        description: `Configuring ${automation.name}. Full configuration options will be available in the next update.`
-      });
-    }
+    setAutomations(updatedAutomations);
   };
 
   return (
@@ -148,8 +146,8 @@ const Automations = () => {
               {automations.map((automation) => (
                 <AutomationCard 
                   key={automation.id} 
-                  automation={automation} 
-                  onConfigure={() => handleConfigureAutomation(automation.id)}
+                  automation={automation}
+                  onUpdate={handleUpdateAutomation}
                 />
               ))}
             </div>
