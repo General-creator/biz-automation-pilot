@@ -92,10 +92,19 @@ const NotificationPanel = ({ notifications }: NotificationPanelProps) => {
                   <div>{getSeverityBadge(notification.severity)}</div>
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDismiss(notification.id)}
+                  >
                     Dismiss
                   </Button>
-                  <Button size="sm">Fix Issue</Button>
+                  <Button 
+                    size="sm"
+                    onClick={() => handleFixIssue(notification)}
+                  >
+                    Fix Issue
+                  </Button>
                 </div>
               </div>
             ))}

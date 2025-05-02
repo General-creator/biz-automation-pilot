@@ -39,7 +39,11 @@ const ActivityLog = ({ activities }: ActivityLogProps) => {
       <CardContent className="p-0">
         <ul className="divide-y">
           {activities.map((activity) => (
-            <li key={activity.id} className="px-6 py-4">
+            <li 
+              key={activity.id} 
+              className="px-6 py-4 cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => handleActivityClick(activity)}
+            >
               <div className="flex items-start gap-3">
                 <div className="mt-0.5">
                   {getStatusIcon(activity.status)}
