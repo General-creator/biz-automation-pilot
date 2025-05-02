@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 export interface Notification {
   id: string;
@@ -38,6 +39,18 @@ const NotificationPanel = ({ notifications }: NotificationPanelProps) => {
           </Badge>
         );
     }
+  };
+  
+  const handleDismiss = (id: string) => {
+    toast("Notification dismissed", {
+      description: "The notification has been removed from your list.",
+    });
+  };
+  
+  const handleFixIssue = (notification: Notification) => {
+    toast("Attempting to fix issue", {
+      description: `Working on resolving issue with ${notification.automationName}.`,
+    });
   };
 
   return (

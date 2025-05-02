@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -174,7 +173,6 @@ const Index = () => {
     if (!newAutomation.name || !newAutomation.description) {
       toast("Please fill in all required fields", {
         description: "Automation name and description are required.",
-        variant: "destructive",
       });
       return;
     }

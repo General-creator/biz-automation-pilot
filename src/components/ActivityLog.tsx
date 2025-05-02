@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CircleCheck, CircleX, Clock } from "lucide-react";
+import { toast } from "sonner";
 
 export interface ActivityItem {
   id: string;
@@ -22,6 +23,12 @@ const ActivityLog = ({ activities }: ActivityLogProps) => {
     ) : (
       <CircleX className="h-5 w-5 text-destructive" />
     );
+  };
+  
+  const handleActivityClick = (activity: ActivityItem) => {
+    toast(`${activity.automationName} details`, {
+      description: activity.message,
+    });
   };
 
   return (
