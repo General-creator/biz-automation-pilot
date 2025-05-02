@@ -1,8 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { Bell, Settings } from "lucide-react";
+import { Bell, Settings, LogOut, LogIn, UserPlus } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Link } from "react-router-dom";
 
 const Header = () => {
+  const { user, logout } = useAuth();
+
   return (
     <header className="border-b bg-white">
       <div className="container flex items-center justify-between py-4">
@@ -13,13 +17,39 @@ const Header = () => {
           <h1 className="text-xl font-bold">AutoPilot</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
-          <Button variant="outline" size="icon">
-            <Settings className="h-5 w-5" />
-          </Button>
-          <Button>Connect Integration</Button>
+          {user ? (
+            <>
+              <span className="mr-2 hidden text-sm text-gray-600 md:block">
+                Welcome, {user.name}
+              </span>
+              <Button variant="outline" size="icon">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <Settings className="h-5 w-5" />
+              </Button>
+              <Button>Connect Integration</Button>
+              <Button variant="outline" onClick={logout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" asChild>
+                <Link to="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/register">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Register
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
