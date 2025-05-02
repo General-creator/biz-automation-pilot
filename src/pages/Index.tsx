@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -14,60 +15,112 @@ import IntegrationsList from "@/components/IntegrationsList";
 import { CirclePlay, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Index = () => {
   const { user } = useAuth();
-  const [automations, setAutomations] = useState<Automation[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAutomation, setNewAutomation] = useState({
     name: "",
     description: "",
     platform: "Zapier" as Automation["platform"]
   });
+  const queryClient = useQueryClient();
 
-  // Sample data for activities
-  const [activities] = useState<ActivityItem[]>([
-    {
-      id: "1",
-      automationName: "New Lead Follow-up",
-      platform: "Zapier",
-      status: "success",
-      timestamp: "Today, 2:30 PM",
-      message: "Email sent to new lead: john.doe@example.com"
+  // Fetch automations from Supabase
+  const { data: automations = [], isLoading: isLoadingAutomations } = useQuery({
+    queryKey: ["automations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("automations")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        toast("Failed to load automations", {
+          description: error.message,
+        });
+        throw error;
+      }
+      
+      return data as Automation[];
     },
-    {
-      id: "2",
-      automationName: "Invoice Paid Notification",
-      platform: "Stripe",
-      status: "success",
-      timestamp: "Yesterday, 5:45 PM",
-      message: "Team notified about invoice #INV-2023-004"
+    enabled: !!user,
+  });
+
+  // Fetch activities from Supabase
+  const { data: activities = [], isLoading: isLoadingActivities } = useQuery({
+    queryKey: ["activities"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .order("timestamp", { ascending: false })
+        .limit(10);
+      
+      if (error) {
+        toast("Failed to load activities", {
+          description: error.message,
+        });
+        throw error;
+      }
+      
+      return data.map(activity => ({
+        id: activity.id,
+        automationName: activity.automation_name,
+        platform: activity.platform,
+        status: activity.status as "success" | "failure",
+        timestamp: new Date(activity.timestamp).toLocaleString(),
+        message: activity.message || ""
+      })) as ActivityItem[];
     },
-    {
-      id: "3",
-      automationName: "Weekly Report Generator",
-      platform: "Airtable",
-      status: "failure",
-      timestamp: "Today, 9:00 AM",
-      message: "Failed to access Airtable API: Authentication error"
+    enabled: !!user,
+  });
+
+  // Create new automation mutation
+  const createAutomationMutation = useMutation({
+    mutationFn: async (automation: {
+      name: string;
+      description: string;
+      platform: string;
+    }) => {
+      const { data, error } = await supabase.from("automations").insert({
+        user_id: user!.id,
+        name: automation.name,
+        description: automation.description,
+        platform: automation.platform,
+        status: "active",
+        last_run: new Date().toISOString(),
+        next_run: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(), // 4 hours from now
+        runs_today: 0,
+        failed_runs: 0
+      }).select();
+
+      if (error) {
+        throw error;
+      }
+
+      return data[0];
     },
-    {
-      id: "4",
-      automationName: "Customer Onboarding Sequence",
-      platform: "HubSpot",
-      status: "success",
-      timestamp: "Today, 3:15 PM",
-      message: "Onboarding email sent to 5 new customers"
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["automations"] });
+      setIsDialogOpen(false);
+      setNewAutomation({
+        name: "",
+        description: "",
+        platform: "Zapier"
+      });
+      toast("Automation created", {
+        description: "Your new automation has been successfully created.",
+      });
     },
-    {
-      id: "5",
-      automationName: "Support Ticket Alerts",
-      platform: "Make",
-      status: "success",
-      timestamp: "Today, 4:20 PM",
-      message: "Alert sent for ticket #T-2023-089: Critical issue"
+    onError: (error) => {
+      toast("Failed to create automation", {
+        description: error.message,
+      });
     }
-  ]);
+  });
 
   // Sample data for notifications
   const [notifications] = useState<Notification[]>([
@@ -139,26 +192,6 @@ const Index = () => {
     }
   ] as any);
 
-  // Load automations from localStorage for this specific user
-  useEffect(() => {
-    if (user) {
-      const storedAutomations = localStorage.getItem(`automations-${user.id}`);
-      if (storedAutomations) {
-        setAutomations(JSON.parse(storedAutomations));
-      } else {
-        // First login for this user, start with empty automations
-        setAutomations([]);
-      }
-    }
-  }, [user]);
-
-  // Save automations to localStorage whenever they change
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(`automations-${user.id}`, JSON.stringify(automations));
-    }
-  }, [automations, user]);
-
   const handleConnectIntegration = () => {
     toast("Connect a new integration", {
       description: "Select from our available integrations to automate your workflows.",
@@ -177,29 +210,7 @@ const Index = () => {
       return;
     }
 
-    const newAutomationItem: Automation = {
-      id: `automation-${Date.now()}`,
-      name: newAutomation.name,
-      description: newAutomation.description,
-      platform: newAutomation.platform,
-      status: "active",
-      lastRun: "Just now",
-      nextRun: "In 4 hours",
-      runsToday: 0,
-      failedRuns: 0
-    };
-
-    setAutomations([...automations, newAutomationItem]);
-    setIsDialogOpen(false);
-    setNewAutomation({
-      name: "",
-      description: "",
-      platform: "Zapier"
-    });
-
-    toast("Automation created", {
-      description: "Your new automation has been successfully created.",
-    });
+    createAutomationMutation.mutate(newAutomation);
   };
 
   return (
@@ -227,7 +238,11 @@ const Index = () => {
                 </Button>
               </div>
               <TabsContent value="automations" className="space-y-6">
-                {automations.length > 0 ? (
+                {isLoadingAutomations ? (
+                  <div className="flex justify-center p-12">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : automations.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {automations.map((automation) => (
                       <AutomationCard key={automation.id} automation={automation} />
@@ -244,7 +259,13 @@ const Index = () => {
                 )}
               </TabsContent>
               <TabsContent value="activity">
-                <ActivityLog activities={activities} />
+                {isLoadingActivities ? (
+                  <div className="flex justify-center p-12">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : (
+                  <ActivityLog activities={activities} />
+                )}
               </TabsContent>
               <TabsContent value="integrations">
                 <IntegrationsList integrations={integrations} />
@@ -315,8 +336,11 @@ const Index = () => {
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveAutomation}>
-              Create Automation
+            <Button 
+              onClick={handleSaveAutomation}
+              disabled={createAutomationMutation.isPending}
+            >
+              {createAutomationMutation.isPending ? "Creating..." : "Create Automation"}
             </Button>
           </DialogFooter>
         </DialogContent>

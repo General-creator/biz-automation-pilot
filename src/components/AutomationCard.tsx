@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Circle, CircleCheck, CirclePlay, CircleX, Clock, Play, Settings, Pause } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Automation {
   id: string;
@@ -14,10 +16,10 @@ export interface Automation {
   description: string;
   platform: "Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail";
   status: "active" | "paused" | "failed";
-  lastRun: string;
-  nextRun?: string;
-  runsToday: number;
-  failedRuns: number;
+  last_run: string;
+  next_run?: string;
+  runs_today: number;
+  failed_runs: number;
 }
 
 interface AutomationCardProps {
@@ -27,18 +29,95 @@ interface AutomationCardProps {
 const AutomationCard = ({ automation }: AutomationCardProps) => {
   const [status, setStatus] = useState<"active" | "paused" | "failed">(automation.status);
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Update automation status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: "active" | "paused" | "failed") => {
+      const { data, error } = await supabase
+        .from("automations")
+        .update({ status: newStatus })
+        .eq("id", automation.id)
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["automations"] });
+      toast(
+        data.status === "active" ? "Automation activated" : "Automation paused", 
+        { description: `${automation.name} has been ${data.status === "active" ? "activated" : "paused"}.` }
+      );
+    },
+    onError: (error) => {
+      toast("Failed to update automation status", {
+        description: error.message,
+      });
+      // Revert UI to previous state
+      setStatus(automation.status);
+    }
+  });
+
+  // Create activity record mutation
+  const createActivityMutation = useMutation({
+    mutationFn: async (activity: {
+      automation_id: string,
+      automation_name: string,
+      platform: string,
+      status: string,
+      message: string
+    }) => {
+      const { data, error } = await supabase
+        .from("activities")
+        .insert({
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          automation_id: activity.automation_id,
+          automation_name: activity.automation_name,
+          platform: activity.platform,
+          status: activity.status,
+          message: activity.message
+        })
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+    }
+  });
 
   const handleToggle = () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const newStatus = status === "active" ? "paused" : "active";
-      setStatus(newStatus);
-      toast(
-        newStatus === "active" ? "Automation activated" : "Automation paused", 
-        { description: `${automation.name} has been ${newStatus === "active" ? "activated" : "paused"}.` }
-      );
-      setIsLoading(false);
-    }, 500);
+    const newStatus = status === "active" ? "paused" : "active";
+    setStatus(newStatus); // Optimistic update
+    
+    updateStatusMutation.mutate(newStatus, {
+      onSettled: () => {
+        setIsLoading(false);
+      }
+    });
+  };
+
+  const handleRunNow = () => {
+    setIsLoading(true);
+    
+    // Record activity
+    createActivityMutation.mutate({
+      automation_id: automation.id,
+      automation_name: automation.name,
+      platform: automation.platform,
+      status: "success",
+      message: "Manual execution triggered by user"
+    }, {
+      onSettled: () => {
+        setIsLoading(false);
+        toast("Automation triggered", {
+          description: `${automation.name} has been manually triggered.`
+        });
+      }
+    });
   };
 
   const getPlatformBadge = (platform: Automation["platform"]) => {
@@ -111,22 +190,22 @@ const AutomationCard = ({ automation }: AutomationCardProps) => {
           <div className="space-y-1">
             <div className="flex items-center">
               <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-              <span className="text-muted-foreground">Last run: {automation.lastRun}</span>
+              <span className="text-muted-foreground">Last run: {new Date(automation.last_run).toLocaleString()}</span>
             </div>
-            {automation.nextRun && (
+            {automation.next_run && (
               <div className="flex items-center">
                 <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                <span className="text-muted-foreground">Next run: {automation.nextRun}</span>
+                <span className="text-muted-foreground">Next run: {new Date(automation.next_run).toLocaleString()}</span>
               </div>
             )}
           </div>
           <div className="space-y-1">
             <div className="flex items-center justify-end">
-              <span className="text-xs bg-secondary px-2 py-0.5 rounded">Runs today: {automation.runsToday}</span>
+              <span className="text-xs bg-secondary px-2 py-0.5 rounded">Runs today: {automation.runs_today}</span>
             </div>
             <div className="flex items-center justify-end">
-              <span className={`text-xs px-2 py-0.5 rounded ${automation.failedRuns > 0 ? 'bg-destructive/10 text-destructive' : 'bg-secondary'}`}>
-                Failed runs: {automation.failedRuns}
+              <span className={`text-xs px-2 py-0.5 rounded ${automation.failed_runs > 0 ? 'bg-destructive/10 text-destructive' : 'bg-secondary'}`}>
+                Failed runs: {automation.failed_runs}
               </span>
             </div>
           </div>
@@ -139,7 +218,8 @@ const AutomationCard = ({ automation }: AutomationCardProps) => {
           <Button 
             variant={status === "active" ? "outline" : "default"} 
             size="sm"
-            disabled={status === "failed"}
+            disabled={status === "failed" || isLoading}
+            onClick={status === "active" ? handleToggle : handleRunNow}
           >
             {status === "active" ? (
               <>

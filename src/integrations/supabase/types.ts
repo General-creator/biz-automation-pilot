@@ -9,6 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activities: {
+        Row: {
+          automation_id: string | null
+          automation_name: string
+          id: string
+          message: string | null
+          platform: string
+          status: string
+          timestamp: string | null
+          user_id: string
+        }
+        Insert: {
+          automation_id?: string | null
+          automation_name: string
+          id?: string
+          message?: string | null
+          platform: string
+          status: string
+          timestamp?: string | null
+          user_id: string
+        }
+        Update: {
+          automation_id?: string | null
+          automation_name?: string
+          id?: string
+          message?: string | null
+          platform?: string
+          status?: string
+          timestamp?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automations: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          failed_runs: number | null
+          id: string
+          last_run: string | null
+          name: string
+          next_run: string | null
+          platform: string
+          runs_today: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          failed_runs?: number | null
+          id?: string
+          last_run?: string | null
+          name: string
+          next_run?: string | null
+          platform: string
+          runs_today?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          failed_runs?: number | null
+          id?: string
+          last_run?: string | null
+          name?: string
+          next_run?: string | null
+          platform?: string
+          runs_today?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       integrations: {
         Row: {
           api_key: string | null

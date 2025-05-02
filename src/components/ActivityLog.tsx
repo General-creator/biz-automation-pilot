@@ -37,36 +37,42 @@ const ActivityLog = ({ activities }: ActivityLogProps) => {
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <ul className="divide-y">
-          {activities.map((activity) => (
-            <li 
-              key={activity.id} 
-              className="px-6 py-4 cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => handleActivityClick(activity)}
-            >
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5">
-                  {getStatusIcon(activity.status)}
-                </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium">
-                      {activity.automationName}{" "}
-                      <span className="text-sm font-normal text-muted-foreground">
-                        ({activity.platform})
-                      </span>
-                    </p>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="mr-1 h-3 w-3" />
-                      {activity.timestamp}
-                    </div>
+        {activities.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <p className="text-muted-foreground">No activity recorded yet</p>
+          </div>
+        ) : (
+          <ul className="divide-y">
+            {activities.map((activity) => (
+              <li 
+                key={activity.id} 
+                className="px-6 py-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => handleActivityClick(activity)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    {getStatusIcon(activity.status)}
                   </div>
-                  <p className="text-sm text-muted-foreground">{activity.message}</p>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">
+                        {activity.automationName}{" "}
+                        <span className="text-sm font-normal text-muted-foreground">
+                          ({activity.platform})
+                        </span>
+                      </p>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="mr-1 h-3 w-3" />
+                        {activity.timestamp}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{activity.message}</p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );
