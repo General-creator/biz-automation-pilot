@@ -6,7 +6,7 @@ import { AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { saveIntegration, ConnectionData } from "@/integrations/integration-service";
+import { saveIntegration, ConnectionData, reconnectIntegration } from "@/integrations/integration-service";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,17 +17,24 @@ import AuthTypeTabs from "./forms/AuthTypeTabs";
 import IntegrationDocumentation from "./forms/IntegrationDocumentation";
 import ConnectionHelpAlert from "./forms/ConnectionHelpAlert";
 import IntegrationFormActions from "./forms/IntegrationFormActions";
+import { Integration } from "@/types/integration";
 
 interface IntegrationConnectFormProps {
   isOpen: boolean;
   onClose: () => void;
+  reconnectIntegration?: Integration | null;
 }
 
-const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps) => {
+const IntegrationConnectForm = ({ 
+  isOpen, 
+  onClose, 
+  reconnectIntegration 
+}: IntegrationConnectFormProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [authType, setAuthType] = useState<"api_key" | "oauth">("api_key");
   const [integrationInfo, setIntegrationInfo] = useState<IntegrationInfo | null>(null);
+  const isReconnecting = !!reconnectIntegration;
   
   const form = useForm<IntegrationFormValues>({
     resolver: zodResolver(integrationFormSchema),
@@ -41,6 +48,21 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
       clientSecret: ""
     }
   });
+  
+  // Set form values when reconnecting
+  useEffect(() => {
+    if (isOpen && reconnectIntegration) {
+      form.reset({
+        integrationName: reconnectIntegration.name,
+        integrationType: reconnectIntegration.type,
+        authType: "api_key", // Default to API key, actual auth type needs to be retrieved from backend
+        apiKey: "",
+        apiSecret: "",
+        clientId: "",
+        clientSecret: ""
+      });
+    }
+  }, [isOpen, reconnectIntegration, form]);
   
   // Reset form when closed
   useEffect(() => {
@@ -104,6 +126,38 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
     }
   });
   
+  // Reconnect mutation
+  const reconnectMutation = useMutation({
+    mutationFn: async (values: IntegrationFormValues & { id: string }) => {
+      if (!user) throw new Error("User not authenticated");
+      
+      // Build connection data based on auth type
+      const connectionData: ConnectionData = {};
+      
+      if (values.authType === "api_key") {
+        if (values.apiKey) connectionData.api_key = values.apiKey;
+        if (values.apiSecret) connectionData.api_secret = values.apiSecret;
+      } else if (values.authType === "oauth") {
+        if (values.clientId) connectionData.client_id = values.clientId;
+        if (values.clientSecret) connectionData.client_secret = values.clientSecret;
+      }
+      
+      const result = await reconnectIntegration(values.id, connectionData);
+      if (!result.success) throw new Error(result.message);
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["integrations"] });
+      onClose();
+      toast.success("Integration reconnected successfully");
+    },
+    onError: (error: Error) => {
+      toast.error("Reconnection failed", {
+        description: error.message
+      });
+    }
+  });
+  
   const onSubmit = (values: IntegrationFormValues) => {
     if (!user) {
       toast.error("Authentication required", {
@@ -112,7 +166,11 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
       return;
     }
     
-    connectMutation.mutate(values);
+    if (isReconnecting && reconnectIntegration) {
+      reconnectMutation.mutate({ ...values, id: reconnectIntegration.id });
+    } else {
+      connectMutation.mutate(values);
+    }
   };
   
   return (
@@ -121,16 +179,25 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
     }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Connect Integration</DialogTitle>
+          <DialogTitle>{isReconnecting ? "Reconnect Integration" : "Connect Integration"}</DialogTitle>
           <DialogDescription>
-            Set up a connection with an external service.
+            {isReconnecting 
+              ? "Update your credentials to reconnect this integration."
+              : "Set up a connection with an external service."
+            }
           </DialogDescription>
         </DialogHeader>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <IntegrationTypeSelect control={form.control} />
-            <IntegrationNameInput control={form.control} />
+            <IntegrationTypeSelect 
+              control={form.control} 
+              disabled={isReconnecting}
+            />
+            <IntegrationNameInput 
+              control={form.control} 
+              disabled={isReconnecting}
+            />
             <AuthTypeTabs 
               control={form.control} 
               authType={authType} 
@@ -148,7 +215,8 @@ const IntegrationConnectForm = ({ isOpen, onClose }: IntegrationConnectFormProps
             
             <IntegrationFormActions
               onCancel={onClose}
-              isPending={connectMutation.isPending}
+              isPending={connectMutation.isPending || reconnectMutation.isPending}
+              isReconnecting={isReconnecting}
             />
           </form>
         </Form>

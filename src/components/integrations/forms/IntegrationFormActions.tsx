@@ -5,9 +5,14 @@ import { DialogFooter } from "@/components/ui/dialog";
 interface IntegrationFormActionsProps {
   onCancel: () => void;
   isPending: boolean;
+  isReconnecting?: boolean;
 }
 
-const IntegrationFormActions = ({ onCancel, isPending }: IntegrationFormActionsProps) => {
+const IntegrationFormActions = ({ 
+  onCancel, 
+  isPending, 
+  isReconnecting = false 
+}: IntegrationFormActionsProps) => {
   return (
     <DialogFooter className="pt-4">
       <Button 
@@ -21,7 +26,10 @@ const IntegrationFormActions = ({ onCancel, isPending }: IntegrationFormActionsP
         type="submit"
         disabled={isPending}
       >
-        {isPending ? "Connecting..." : "Connect"}
+        {isPending 
+          ? isReconnecting ? "Reconnecting..." : "Connecting..." 
+          : isReconnecting ? "Reconnect" : "Connect"
+        }
       </Button>
     </DialogFooter>
   );

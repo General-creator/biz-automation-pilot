@@ -6,9 +6,10 @@ import { IntegrationFormValues } from "./integration-form-types";
 
 interface IntegrationNameInputProps {
   control: Control<IntegrationFormValues>;
+  disabled?: boolean;
 }
 
-const IntegrationNameInput = ({ control }: IntegrationNameInputProps) => {
+const IntegrationNameInput = ({ control, disabled = false }: IntegrationNameInputProps) => {
   return (
     <FormField
       control={control}
@@ -17,7 +18,11 @@ const IntegrationNameInput = ({ control }: IntegrationNameInputProps) => {
         <FormItem>
           <FormLabel>Integration Name</FormLabel>
           <FormControl>
-            <Input placeholder="Enter integration name" {...field} />
+            <Input 
+              placeholder="e.g., My Zapier Integration" 
+              {...field} 
+              disabled={disabled}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

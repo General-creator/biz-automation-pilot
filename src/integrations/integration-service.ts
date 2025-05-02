@@ -208,12 +208,19 @@ export async function disconnectIntegration(integrationId: string) {
   }
 }
 
-// Reconnect an integration
-export async function reconnectIntegration(integrationId: string) {
+// Reconnect an integration with optional new connection data
+export async function reconnectIntegration(integrationId: string, connectionData?: ConnectionData) {
   try {
+    let updateData: Record<string, any> = { status: "connected" };
+    
+    // If new connection data is provided, update the API key field
+    if (connectionData && Object.keys(connectionData).length > 0) {
+      updateData.api_key = JSON.stringify(connectionData);
+    }
+    
     const { data, error } = await supabase
       .from("integrations")
-      .update({ status: "connected" })
+      .update(updateData)
       .eq("id", integrationId)
       .select("*");
       

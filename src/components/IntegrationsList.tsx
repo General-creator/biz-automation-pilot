@@ -7,6 +7,7 @@ import { useIntegrations } from "@/hooks/useIntegrations";
 import IntegrationConnectForm from "./integrations/IntegrationConnectForm";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Integration } from "@/types/integration";
 
 interface IntegrationsListProps {
   integrations?: any[];
@@ -14,6 +15,7 @@ interface IntegrationsListProps {
 
 const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListProps) => {
   const [isConnectFormOpen, setIsConnectFormOpen] = useState(false);
+  const [reconnectIntegration, setReconnectIntegration] = useState<Integration | null>(null);
   
   const {
     groupedIntegrations,
@@ -31,11 +33,30 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
     });
   };
 
+  // Open the reconnect form with the selected integration
+  const handleReconnectWithForm = (id: string) => {
+    const integration = Object.values(groupedIntegrations)
+      .flat()
+      .find(int => int.id === id);
+    
+    if (integration) {
+      setReconnectIntegration(integration);
+      setIsConnectFormOpen(true);
+    } else {
+      toast.error("Integration not found");
+    }
+  };
+  
   // Handle reconnect click for integrations in the home page
   const handleHomePageReconnect = (id: string) => {
     toast("Feature in progress", {
       description: "The reconnect action from the homepage is not yet available. Please use the integrations settings page.",
     });
+  };
+  
+  const handleCloseForm = () => {
+    setIsConnectFormOpen(false);
+    setReconnectIntegration(null);
   };
   
   if (isLoading && !propIntegrations) {
@@ -69,7 +90,8 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
                   category={category === "workflow" ? "Workflow" : category === "agent" ? "Agent" : category}
                   integrations={items}
                   onDisconnect={propIntegrations ? handleHomePageDisconnect : handleDisconnect}
-                  onReconnect={propIntegrations ? handleHomePageReconnect : handleReconnect}
+                  onReconnect={propIntegrations ? handleHomePageReconnect : 
+                               (id) => propIntegrations ? handleHomePageReconnect(id) : handleReconnectWithForm(id)}
                   isLoading={isDisconnectLoading || isReconnectLoading}
                 />
               ))}
@@ -80,7 +102,8 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
 
       <IntegrationConnectForm
         isOpen={isConnectFormOpen}
-        onClose={() => setIsConnectFormOpen(false)}
+        onClose={handleCloseForm}
+        reconnectIntegration={reconnectIntegration}
       />
     </>
   );

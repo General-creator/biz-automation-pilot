@@ -6,9 +6,10 @@ import { IntegrationFormValues } from "./integration-form-types";
 
 interface IntegrationTypeSelectProps {
   control: Control<IntegrationFormValues>;
+  disabled?: boolean;
 }
 
-const IntegrationTypeSelect = ({ control }: IntegrationTypeSelectProps) => {
+const IntegrationTypeSelect = ({ control, disabled = false }: IntegrationTypeSelectProps) => {
   return (
     <FormField
       control={control}
@@ -16,9 +17,10 @@ const IntegrationTypeSelect = ({ control }: IntegrationTypeSelectProps) => {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Integration Type</FormLabel>
-          <Select
-            onValueChange={field.onChange}
+          <Select 
+            onValueChange={field.onChange} 
             defaultValue={field.value}
+            disabled={disabled}
           >
             <FormControl>
               <SelectTrigger>
