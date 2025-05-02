@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Circle, CircleCheck, CirclePlay, CircleX, Clock, Connect, Play, Settings, Pause } from "lucide-react";
+import { Circle, CircleCheck, CirclePlay, CircleX, Clock, Play, Settings, Pause } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
@@ -15,7 +15,7 @@ export interface Automation {
   name: string;
   description: string;
   platform: "Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail";
-  connectedPlatforms?: Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">; // Added connected platforms
+  connectedPlatforms?: Array<"Zapier" | "Make" | "HubSpot" | "Stripe" | "Airtable" | "Gmail">;
   status: "active" | "paused" | "failed";
   last_run: string;
   next_run?: string;
@@ -179,7 +179,7 @@ const AutomationCard = ({ automation }: AutomationCardProps) => {
           {/* Display connected platforms if they exist */}
           {automation.connectedPlatforms && automation.connectedPlatforms.length > 0 && (
             <div className="flex items-center gap-1 mt-2">
-              <Connect className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+              <CirclePlay className="h-3.5 w-3.5 text-muted-foreground mr-1" />
               <span className="text-xs text-muted-foreground mr-1">Connected with:</span>
               <div className="flex gap-1 flex-wrap">
                 {automation.connectedPlatforms.map((platform) => (
