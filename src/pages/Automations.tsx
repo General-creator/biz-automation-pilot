@@ -14,6 +14,7 @@ const sampleAutomations = [
     name: "New Customer Follow-up",
     description: "Sends a welcome email when a new customer signs up",
     platform: "Gmail" as const,
+    connectedPlatforms: ["HubSpot", "Zapier"] as const,
     status: "active" as const,
     last_run: new Date().toISOString(),
     next_run: new Date(Date.now() + 86400000).toISOString(), // tomorrow
@@ -25,6 +26,7 @@ const sampleAutomations = [
     name: "Lead Qualification",
     description: "Scores and categorizes new leads based on criteria",
     platform: "HubSpot" as const,
+    connectedPlatforms: ["Zapier", "Airtable"] as const,
     status: "paused" as const,
     last_run: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
     runs_today: 0,
@@ -35,6 +37,7 @@ const sampleAutomations = [
     name: "Payment Notification",
     description: "Sends notifications when payments are processed",
     platform: "Stripe" as const,
+    connectedPlatforms: ["Gmail", "Make"] as const,
     status: "failed" as const,
     last_run: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
     runs_today: 12,
