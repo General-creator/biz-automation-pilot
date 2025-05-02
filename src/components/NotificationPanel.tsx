@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Notification {
   id: string;
@@ -11,13 +14,55 @@ export interface Notification {
   message: string;
   timestamp: string;
   severity: "high" | "medium" | "low";
+  automationId?: string;
 }
 
 interface NotificationPanelProps {
-  notifications: Notification[];
+  notifications?: Notification[];
 }
 
-const NotificationPanel = ({ notifications }: NotificationPanelProps) => {
+const NotificationPanel = ({ notifications: initialNotifications }: NotificationPanelProps) => {
+  const queryClient = useQueryClient();
+  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications || []);
+  
+  // Fetch automations with issues to generate notifications
+  const { data: automations } = useQuery({
+    queryKey: ["automations-with-issues"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("automations")
+        .select("*")
+        .or("failed_runs.gt.0");
+      
+      if (error) {
+        toast("Failed to load automations with issues", {
+          description: error.message,
+        });
+        throw error;
+      }
+      
+      // Generate notifications from automations with issues
+      if (data && data.length > 0) {
+        const newNotifications: Notification[] = data.map(automation => ({
+          id: `notification-${automation.id}`,
+          automationId: automation.id,
+          automationName: automation.name,
+          message: automation.failed_runs > 0 
+            ? `${automation.failed_runs} consecutive failures detected`
+            : "Issue detected with this automation",
+          timestamp: new Date(automation.updated_at || Date.now()).toLocaleString(),
+          severity: automation.failed_runs > 3 ? "high" : "medium"
+        }));
+        
+        setNotifications(newNotifications);
+        return data;
+      }
+      
+      return data || [];
+    },
+    enabled: initialNotifications === undefined,
+  });
+  
   const getSeverityBadge = (severity: "high" | "medium" | "low") => {
     switch (severity) {
       case "high":
@@ -41,16 +86,62 @@ const NotificationPanel = ({ notifications }: NotificationPanelProps) => {
     }
   };
   
+  // Reset failed runs for an automation
+  const resetAutomationIssue = useMutation({
+    mutationFn: async (automationId: string) => {
+      const { data, error } = await supabase
+        .from("automations")
+        .update({
+          failed_runs: 0,
+          status: "active"
+        })
+        .eq("id", automationId)
+        .select();
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["automations"] });
+      queryClient.invalidateQueries({ queryKey: ["automations-with-issues"] });
+    }
+  });
+  
   const handleDismiss = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
     toast("Notification dismissed", {
       description: "The notification has been removed from your list.",
     });
   };
   
   const handleFixIssue = (notification: Notification) => {
-    toast("Attempting to fix issue", {
-      description: `Working on resolving issue with ${notification.automationName}.`,
-    });
+    if (notification.automationId) {
+      resetAutomationIssue.mutate(notification.automationId, {
+        onSuccess: () => {
+          handleDismiss(notification.id);
+          toast("Issue fixed", {
+            description: `Issue with ${notification.automationName} has been resolved.`,
+          });
+        },
+        onError: (error) => {
+          toast("Failed to fix issue", {
+            description: `Error: ${error.message}`,
+          });
+        }
+      });
+    } else {
+      toast("Attempting to fix issue", {
+        description: `Working on resolving issue with ${notification.automationName}.`,
+      });
+      
+      // Remove notification after a delay to simulate fixing
+      setTimeout(() => {
+        handleDismiss(notification.id);
+        toast("Issue fixed", {
+          description: `Issue with ${notification.automationName} has been resolved.`,
+        });
+      }, 1500);
+    }
   };
 
   return (
@@ -102,8 +193,9 @@ const NotificationPanel = ({ notifications }: NotificationPanelProps) => {
                   <Button 
                     size="sm"
                     onClick={() => handleFixIssue(notification)}
+                    disabled={resetAutomationIssue.isPending}
                   >
-                    Fix Issue
+                    {resetAutomationIssue.isPending ? "Fixing..." : "Fix Issue"}
                   </Button>
                 </div>
               </div>

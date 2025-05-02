@@ -16,7 +16,7 @@ const Integrations = () => {
                 <CardTitle>Manage Integrations</CardTitle>
               </CardHeader>
               <CardContent>
-                <IntegrationsList showHeader={false} />
+                <IntegrationsList />
               </CardContent>
             </Card>
           </div>
