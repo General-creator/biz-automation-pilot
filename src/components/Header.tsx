@@ -5,7 +5,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
 
   return (
     <header className="border-b bg-white">
@@ -20,7 +26,7 @@ const Header = () => {
           {user ? (
             <>
               <span className="mr-2 hidden text-sm text-gray-600 md:block">
-                Welcome, {user.name}
+                Welcome, {displayName}
               </span>
               <Button variant="outline" size="icon">
                 <Bell className="h-5 w-5" />
@@ -29,7 +35,7 @@ const Header = () => {
                 <Settings className="h-5 w-5" />
               </Button>
               <Button>Connect Integration</Button>
-              <Button variant="outline" onClick={logout}>
+              <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </Button>

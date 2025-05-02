@@ -105,10 +105,6 @@ const Login = () => {
               {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </div>
-          
-          <div className="text-center text-sm text-gray-600">
-            <p>Demo credentials: demo@example.com / password</p>
-          </div>
         </form>
       </div>
     </div>

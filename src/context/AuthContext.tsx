@@ -1,19 +1,25 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Session, User } from "@supabase/supabase-js";
 
-type User = {
+type Profile = {
   id: string;
-  email: string;
-  name: string;
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
+  is_admin: boolean;
 };
 
 type AuthContextType = {
   user: User | null;
+  profile: Profile | null;
   isLoading: boolean;
+  session: Session | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,52 +34,88 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Check if user is already logged in
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  // Fetch user profile data
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      return data as Profile;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
     }
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        // Fetch profile using setTimeout to prevent any potential deadlock
+        if (currentSession?.user) {
+          setTimeout(async () => {
+            const userProfile = await fetchProfile(currentSession.user.id);
+            setProfile(userProfile);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      
+      if (currentSession?.user) {
+        fetchProfile(currentSession.user.id).then((userProfile) => {
+          setProfile(userProfile);
+          setIsLoading(false);
+        });
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       
-      // In a real app, this would be an API call
-      // For demo purposes, we'll simulate authentication
-      if (email === "demo@example.com" && password === "password") {
-        const user = { id: "1", email, name: "Demo User" };
-        localStorage.setItem("user", JSON.stringify(user));
-        setUser(user);
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
-        });
-        return;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        throw new Error(error.message);
       }
       
-      // Check if user exists in localStorage (for demo purposes)
-      const registeredUsers = JSON.parse(localStorage.getItem("users") || "[]");
-      const foundUser = registeredUsers.find((u: any) => 
-        u.email === email && u.password === password
-      );
-      
-      if (foundUser) {
-        const user = { id: foundUser.id, email: foundUser.email, name: foundUser.name };
-        localStorage.setItem("user", JSON.stringify(user));
-        setUser(user);
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
-        });
-      } else {
-        throw new Error("Invalid email or password");
-      }
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
     } catch (error) {
       toast({
         title: "Login failed",
@@ -90,29 +132,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       
-      // In a real app, this would be an API call
-      // For demo purposes, we'll store in localStorage
-      const registeredUsers = JSON.parse(localStorage.getItem("users") || "[]");
-      
-      // Check if user already exists
-      if (registeredUsers.some((u: any) => u.email === email)) {
-        throw new Error("User with this email already exists");
-      }
-      
-      const newUser = {
-        id: `user-${Date.now()}`,
-        name,
+      const { data, error } = await supabase.auth.signUp({
         email,
-        password, // In a real app, this would be hashed
-      };
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
       
-      registeredUsers.push(newUser);
-      localStorage.setItem("users", JSON.stringify(registeredUsers));
-      
-      // Auto login after registration
-      const user = { id: newUser.id, email: newUser.email, name: newUser.name };
-      localStorage.setItem("user", JSON.stringify(user));
-      setUser(user);
+      if (error) {
+        throw new Error(error.message);
+      }
       
       toast({
         title: "Registration successful",
@@ -130,17 +162,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
-    });
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: "There was an issue logging you out",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, profile, session, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
