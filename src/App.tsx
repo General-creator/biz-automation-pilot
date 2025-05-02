@@ -11,6 +11,12 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
+// Settings pages
+import Account from "./pages/settings/Account";
+import Integrations from "./pages/settings/Integrations";
+import Analytics from "./pages/settings/Analytics";
+import Help from "./pages/settings/Help";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -28,7 +34,12 @@ const App = () => (
             {/* Protected routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
-              {/* Add more protected routes here */}
+              
+              {/* Settings routes */}
+              <Route path="/settings/account" element={<Account />} />
+              <Route path="/settings/integrations" element={<Integrations />} />
+              <Route path="/settings/analytics" element={<Analytics />} />
+              <Route path="/settings/help" element={<Help />} />
             </Route>
             
             {/* Catch-all route */}

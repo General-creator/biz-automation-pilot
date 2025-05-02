@@ -12,7 +12,7 @@ import {
   BarChart
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -25,15 +25,17 @@ import { toast } from "sonner";
 
 const Header = () => {
   const { user, profile, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
   };
 
-  const handleSettingsClick = (setting: string) => {
-    toast(`${setting} settings`, {
-      description: `Opening ${setting.toLowerCase()} settings panel`,
+  const handleSettingsNavigation = (path: string, setting: string) => {
+    toast(`Navigating to ${setting}`, {
+      description: `Opening ${setting.toLowerCase()} settings page`,
     });
+    navigate(path);
   };
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
@@ -42,10 +44,12 @@ const Header = () => {
     <header className="border-b bg-white">
       <div className="container flex items-center justify-between py-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
-            <span className="text-lg font-bold text-white">A</span>
-          </div>
-          <h1 className="text-xl font-bold">AutoPilot</h1>
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
+              <span className="text-lg font-bold text-white">A</span>
+            </div>
+            <h1 className="text-xl font-bold">AutoPilot</h1>
+          </Link>
         </div>
         <div className="flex items-center gap-2">
           {user ? (
@@ -65,20 +69,20 @@ const Header = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>Settings</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleSettingsClick("Account")}>
+                  <DropdownMenuItem onClick={() => handleSettingsNavigation("/settings/account", "Account")}>
                     <User className="mr-2 h-4 w-4" />
                     Account
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSettingsClick("Integrations")}>
+                  <DropdownMenuItem onClick={() => handleSettingsNavigation("/settings/integrations", "Integrations")}>
                     <Cog className="mr-2 h-4 w-4" />
                     Integrations
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSettingsClick("Analytics")}>
+                  <DropdownMenuItem onClick={() => handleSettingsNavigation("/settings/analytics", "Analytics")}>
                     <BarChart className="mr-2 h-4 w-4" />
                     Analytics
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleSettingsClick("Help")}>
+                  <DropdownMenuItem onClick={() => handleSettingsNavigation("/settings/help", "Help")}>
                     <HelpCircle className="mr-2 h-4 w-4" />
                     Help & Support
                   </DropdownMenuItem>
