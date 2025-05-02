@@ -4,7 +4,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -15,49 +14,57 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-const loginSchema = z.object({
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const Login = () => {
-  const { login } = useAuth();
+const Register = () => {
+  const { register } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      const success = await login(data.email, data.password);
+      const success = await register(data.name, data.email, data.password);
       
       if (success) {
-        toast.success("Login successful", {
-          description: "Welcome back!",
+        toast.success("Account created", {
+          description: "Your account has been created successfully!",
         });
         navigate("/dashboard");
       } else {
-        toast.error("Login failed", {
-          description: "Invalid email or password",
+        toast.error("Registration failed", {
+          description: "An account with this email already exists.",
         });
       }
     } catch (error) {
-      toast.error("Login failed", {
-        description: "An error occurred during login",
+      toast.error("Registration failed", {
+        description: "An error occurred during registration",
       });
     } finally {
       setIsLoading(false);
@@ -66,6 +73,10 @@ const Login = () => {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -77,13 +88,31 @@ const Login = () => {
           </div>
           <h1 className="text-2xl font-bold">AutoPilot</h1>
           <p className="text-muted-foreground">
-            Sign in to your account to continue
+            Create a new account to get started
           </p>
         </div>
 
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="John Doe"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="email"
@@ -92,6 +121,7 @@ const Login = () => {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
+                        type="email"
                         placeholder="you@example.com"
                         {...field}
                         disabled={isLoading}
@@ -137,6 +167,41 @@ const Login = () => {
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          {...field}
+                          disabled={isLoading}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={toggleConfirmPasswordVisibility}
+                          className="absolute right-0 top-0"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">Toggle confirm password visibility</span>
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <Button
                 type="submit"
                 className="w-full"
@@ -145,41 +210,25 @@ const Login = () => {
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    <span>Signing in...</span>
+                    <span>Creating account...</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
-                    <LogIn className="h-4 w-4" />
-                    <span>Sign in</span>
+                    <UserPlus className="h-4 w-4" />
+                    <span>Create Account</span>
                   </div>
                 )}
               </Button>
             </form>
           </Form>
 
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="font-medium text-primary hover:underline">
-                Create account
+              Already have an account?{" "}
+              <Link to="/login" className="font-medium text-primary hover:underline">
+                Sign in
               </Link>
             </p>
-          </div>
-
-          <div className="mt-6">
-            <p className="text-center text-muted-foreground text-sm">
-              Demo accounts:
-            </p>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <div className="text-xs border rounded p-2">
-                <div><strong>Admin:</strong> admin@example.com</div>
-                <div><strong>Pass:</strong> password123</div>
-              </div>
-              <div className="text-xs border rounded p-2">
-                <div><strong>User:</strong> user@example.com</div>
-                <div><strong>Pass:</strong> password123</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -187,4 +236,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

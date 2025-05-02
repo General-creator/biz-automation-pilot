@@ -14,6 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -40,6 +41,7 @@ const MOCK_USERS = [
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mockUsers, setMockUsers] = useState(MOCK_USERS);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -55,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const foundUser = MOCK_USERS.find(
+    const foundUser = mockUsers.find(
       u => u.email === email && u.password === password
     );
     
@@ -67,6 +69,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     
     return false;
+  };
+  
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Check if user with this email already exists
+    const userExists = mockUsers.some(u => u.email === email);
+    
+    if (userExists) {
+      return false;
+    }
+    
+    // Create new user
+    const newUser = {
+      id: `${mockUsers.length + 1}`,
+      email,
+      password,
+      name,
+      role: 'user' as const,
+    };
+    
+    // Add to mock users array
+    setMockUsers(prev => [...prev, newUser]);
+    
+    // Log the user in
+    const { password: _, ...userWithoutPassword } = newUser;
+    setUser(userWithoutPassword);
+    sessionStorage.setItem('user', JSON.stringify(userWithoutPassword));
+    
+    return true;
   };
   
   const logout = () => {
@@ -82,6 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isAuthenticated: !!user,
         isLoading,
         login,
+        register,
         logout,
       }}
     >
