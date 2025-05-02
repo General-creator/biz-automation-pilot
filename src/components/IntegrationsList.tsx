@@ -28,9 +28,13 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
 
   // Handle disconnect click for integrations in the home page
   const handleHomePageDisconnect = (id: string) => {
-    toast("Feature in progress", {
-      description: "The disconnect action from the homepage is not yet available. Please use the integrations settings page.",
-    });
+    if (propIntegrations) {
+      // For home page, when using propIntegrations
+      toast("Disconnecting integration...");
+      handleDisconnect(id);
+    } else {
+      handleDisconnect(id);
+    }
   };
 
   // Open the reconnect form with the selected integration
@@ -49,9 +53,14 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
   
   // Handle reconnect click for integrations in the home page
   const handleHomePageReconnect = (id: string) => {
-    toast("Feature in progress", {
-      description: "The reconnect action from the homepage is not yet available. Please use the integrations settings page.",
-    });
+    const integration = propIntegrations?.find(int => int.id === id);
+    
+    if (integration) {
+      setReconnectIntegration(integration);
+      setIsConnectFormOpen(true);
+    } else {
+      toast.error("Integration not found");
+    }
   };
   
   const handleCloseForm = () => {
@@ -90,8 +99,7 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
                   category={category === "workflow" ? "Workflow" : category === "agent" ? "Agent" : category}
                   integrations={items}
                   onDisconnect={propIntegrations ? handleHomePageDisconnect : handleDisconnect}
-                  onReconnect={propIntegrations ? handleHomePageReconnect : 
-                               (id) => propIntegrations ? handleHomePageReconnect(id) : handleReconnectWithForm(id)}
+                  onReconnect={propIntegrations ? handleHomePageReconnect : handleReconnectWithForm}
                   isLoading={isDisconnectLoading || isReconnectLoading}
                 />
               ))}
