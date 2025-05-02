@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -101,6 +100,12 @@ const Header = () => {
               Agents
             </Link>
             <Link
+              to="/workflows"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+            >
+              Workflows
+            </Link>
+            <Link
               to="/settings"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-accent hover:text-accent-foreground"
             >
@@ -126,6 +131,12 @@ const Header = () => {
           className="text-sm font-medium transition-colors hover:text-primary"
         >
           Agents
+        </Link>
+        <Link
+          to="/workflows"
+          className="text-sm font-medium transition-colors hover:text-primary"
+        >
+          Workflows
         </Link>
         <Link
           to="/settings"

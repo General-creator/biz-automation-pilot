@@ -14,6 +14,7 @@ import { AuthProvider } from "./context/AuthContext";
 // Dashboard pages
 import Dashboard from "./pages/Dashboard";
 import Agents from "./pages/Automations";
+import Workflows from "./pages/Workflows";
 
 // Settings pages
 import Account from "./pages/settings/Account";
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/automations" element={<Agents />} />
+              <Route path="/workflows" element={<Workflows />} />
               
               {/* Settings routes */}
               <Route path="/settings" element={<Settings />} />
