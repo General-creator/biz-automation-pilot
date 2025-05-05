@@ -12,8 +12,7 @@ interface AuthenticationFieldsProps {
 
 const AuthenticationFields = ({ control, authType }: AuthenticationFieldsProps) => {
   return (
-    <>
-      {/* Only render the TabsContent that matches the current authType */}
+    <Tabs value={authType} className="w-full">
       {authType === "api_key" && (
         <TabsContent value="api_key" className="mt-4 space-y-4">
           <ApiKeyFields control={control} />
@@ -25,7 +24,7 @@ const AuthenticationFields = ({ control, authType }: AuthenticationFieldsProps) 
           <OAuthFields control={control} />
         </TabsContent>
       )}
-    </>
+    </Tabs>
   );
 };
 
