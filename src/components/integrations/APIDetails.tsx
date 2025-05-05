@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Copy, Check } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Copy, Check, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -15,6 +16,7 @@ interface APIDetailsProps {
 const APIDetails = ({ integrationId, apiKey, webhookUrl }: APIDetailsProps) => {
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
   const [webhookCopied, setWebhookCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("javascript");
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText(apiKey);
@@ -30,8 +32,10 @@ const APIDetails = ({ integrationId, apiKey, webhookUrl }: APIDetailsProps) => {
     setTimeout(() => setWebhookCopied(false), 2000);
   };
 
-  const exampleCode = `
-// Example POST request
+  // Code examples for different platforms
+  const codeExamples = {
+    javascript: `
+// Example POST request using JavaScript fetch
 fetch("${webhookUrl}", {
   method: "POST",
   headers: {
@@ -41,21 +45,104 @@ fetch("${webhookUrl}", {
   body: JSON.stringify({
     data: {
       // Your data goes here
-      message: "Hello from your automation!"
+      message: "Hello from your automation!",
+      timestamp: new Date().toISOString(),
+      source: "YourAutomationTool"
     }
   })
 })
 .then(response => response.json())
 .then(data => console.log(data))
 .catch(error => console.error("Error:", error));
-  `.trim();
+`.trim(),
+
+    zapier: `
+// Zapier Code Step
+const response = await fetch("${webhookUrl}", {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${apiKey}'
+  },
+  body: JSON.stringify({
+    data: {
+      // Add your Zapier data from previous steps
+      zapier_data: inputData,
+      automation_name: 'Zapier Flow',
+      timestamp: new Date().toISOString()
+    }
+  })
+});
+
+// Parse the response
+const result = await response.json();
+return result;
+`.trim(),
+
+    make: `
+// Make.com HTTP Module Setup:
+
+URL: ${webhookUrl}
+Method: POST
+Headers:
+  Content-Type: application/json
+  Authorization: Bearer ${apiKey}
+
+Body (JSON):
+{
+  "data": {
+    "make_data": {{your_previous_module_data}},
+    "automation_name": "Make Flow",
+    "timestamp": "{{formatDate(now; YYYY-MM-DD HH:mm:ss)}}"
+  }
+}
+
+// Use the 'Parse JSON' option for the response if needed
+`.trim(),
+
+    hubspot: `
+// HubSpot Custom Code Action
+const axios = require('axios');
+
+exports.main = async (event, callback) => {
+  try {
+    const response = await axios.post('${webhookUrl}', {
+      data: {
+        hubspot_data: event.inputFields,
+        contact_id: event.object.objectId,
+        automation_name: 'HubSpot Workflow',
+        timestamp: new Date().toISOString()
+      }
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${apiKey}'
+      }
+    });
+    
+    callback({
+      outputFields: {
+        status: response.status,
+        response: JSON.stringify(response.data)
+      }
+    });
+  } catch (error) {
+    callback({
+      outputFields: {
+        error: error.message
+      }
+    });
+  }
+};
+`.trim()
+  };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Integration API Details</CardTitle>
         <CardDescription>
-          Use these credentials to connect your automation to our platform
+          Use these credentials to connect your automation to Orbit
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -81,6 +168,9 @@ fetch("${webhookUrl}", {
               )}
             </Button>
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            This is your unique API key for this integration. Keep it secure.
+          </p>
         </div>
 
         <div>
@@ -104,13 +194,74 @@ fetch("${webhookUrl}", {
               )}
             </Button>
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Send HTTP POST requests to this URL from your automation platform
+          </p>
         </div>
 
         <div className="pt-2">
-          <label className="text-sm font-medium">Example Usage</label>
-          <div className="mt-1 p-4 bg-muted rounded-md overflow-x-auto">
-            <pre className="text-xs font-mono">{exampleCode}</pre>
-          </div>
+          <label className="text-sm font-medium">Integration Examples</label>
+          
+          <Tabs defaultValue="javascript" value={activeTab} onValueChange={setActiveTab} className="mt-2">
+            <TabsList className="grid grid-cols-4 mb-2">
+              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+              <TabsTrigger value="zapier">Zapier</TabsTrigger>
+              <TabsTrigger value="make">Make</TabsTrigger>
+              <TabsTrigger value="hubspot">HubSpot</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="javascript" className="mt-0">
+              <div className="p-4 bg-muted rounded-md overflow-x-auto">
+                <pre className="text-xs font-mono">{codeExamples.javascript}</pre>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="zapier" className="mt-0">
+              <div className="p-4 bg-muted rounded-md overflow-x-auto">
+                <pre className="text-xs font-mono">{codeExamples.zapier}</pre>
+              </div>
+              <div className="mt-2 flex justify-end">
+                <Button variant="link" size="sm" className="text-xs flex items-center gap-1" asChild>
+                  <a href="https://zapier.com/apps/code/integrations" target="_blank" rel="noopener noreferrer">
+                    Zapier Code Docs <ExternalLink className="h-3 w-3" />
+                  </a>
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="make" className="mt-0">
+              <div className="p-4 bg-muted rounded-md overflow-x-auto">
+                <pre className="text-xs font-mono">{codeExamples.make}</pre>
+              </div>
+              <div className="mt-2 flex justify-end">
+                <Button variant="link" size="sm" className="text-xs flex items-center gap-1" asChild>
+                  <a href="https://www.make.com/en/help/tools/http" target="_blank" rel="noopener noreferrer">
+                    Make HTTP Docs <ExternalLink className="h-3 w-3" />
+                  </a>
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="hubspot" className="mt-0">
+              <div className="p-4 bg-muted rounded-md overflow-x-auto">
+                <pre className="text-xs font-mono">{codeExamples.hubspot}</pre>
+              </div>
+              <div className="mt-2 flex justify-end">
+                <Button variant="link" size="sm" className="text-xs flex items-center gap-1" asChild>
+                  <a href="https://developers.hubspot.com/docs/api/workflows/custom-code-actions" target="_blank" rel="noopener noreferrer">
+                    HubSpot Custom Code Docs <ExternalLink className="h-3 w-3" />
+                  </a>
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+        
+        <div className="pt-2 pb-1 text-xs text-muted-foreground border-t">
+          <p className="mt-2">
+            This integration will send automation metrics to your Orbit dashboard, allowing you to track performance, 
+            usage patterns, and success rates across all your connected platforms.
+          </p>
         </div>
       </CardContent>
     </Card>

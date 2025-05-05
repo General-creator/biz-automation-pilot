@@ -1,5 +1,5 @@
 
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApiKeyFields from "./ApiKeyFields";
 import OAuthFields from "./OAuthFields";
 import { Control } from "react-hook-form";
@@ -12,18 +12,19 @@ interface AuthenticationFieldsProps {
 
 const AuthenticationFields = ({ control, authType }: AuthenticationFieldsProps) => {
   return (
-    <Tabs value={authType} className="w-full">
-      {authType === "api_key" && (
-        <TabsContent value="api_key" className="mt-4 space-y-4">
-          <ApiKeyFields control={control} />
-        </TabsContent>
-      )}
+    <Tabs defaultValue={authType} className="w-full">
+      <TabsList className="hidden">
+        <TabsTrigger value="api_key">API Key</TabsTrigger>
+        <TabsTrigger value="oauth">OAuth</TabsTrigger>
+      </TabsList>
       
-      {authType === "oauth" && (
-        <TabsContent value="oauth" className="mt-4 space-y-4">
-          <OAuthFields control={control} />
-        </TabsContent>
-      )}
+      <TabsContent value="api_key" className="mt-4 space-y-4">
+        <ApiKeyFields control={control} />
+      </TabsContent>
+      
+      <TabsContent value="oauth" className="mt-4 space-y-4">
+        <OAuthFields control={control} />
+      </TabsContent>
     </Tabs>
   );
 };

@@ -5,6 +5,7 @@ import { Integration } from "@/types/integration";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import APIDetails from "./APIDetails";
+import { Activity, Webhook } from "lucide-react";
 
 interface IntegrationItemProps {
   integration: Integration;
@@ -42,7 +43,11 @@ const IntegrationItem = ({
             </div>
           ) : (
             <div className="w-8 h-8 flex items-center justify-center bg-muted rounded-md">
-              <span>{integration.name.charAt(0)}</span>
+              {integration.type === "workflow" ? (
+                <Webhook className="h-4 w-4 text-[#D94A38]" />
+              ) : (
+                <Activity className="h-4 w-4 text-[#4D7C79]" />
+              )}
             </div>
           )}
           <div>
@@ -68,7 +73,9 @@ const IntegrationItem = ({
               variant="outline"
               size="sm"
               onClick={() => setShowApiDetails(true)}
+              className="flex items-center gap-1"
             >
+              <Webhook className="h-3 w-3" />
               API Details
             </Button>
           )}
@@ -88,7 +95,7 @@ const IntegrationItem = ({
       </div>
       
       <Dialog open={showApiDetails} onOpenChange={setShowApiDetails}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
             <DialogTitle>API Details for {integration.name}</DialogTitle>
           </DialogHeader>
