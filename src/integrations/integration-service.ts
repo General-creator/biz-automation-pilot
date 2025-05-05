@@ -73,6 +73,18 @@ export interface ConnectionData {
   [key: string]: string;
 }
 
+// Generate a pseudo-random API key for integrations
+// In production, this would be handled securely on the server
+export function generateApiKey(integrationId: string): string {
+  return `api_${integrationId.substring(0, 16)}`;
+}
+
+// Get webhook URL for an integration
+export function getWebhookUrl(integrationId: string): string {
+  // In production, this would be your actual API domain
+  return `https://api.yourdomain.com/integrations/${integrationId}/webhook`;
+}
+
 // Test a connection to verify credentials work
 export async function testConnection(
   integrationName: string,
@@ -248,6 +260,38 @@ export async function reconnectIntegration(integrationId: string, connectionData
     return { 
       success: false, 
       message: `Failed to reconnect: ${error instanceof Error ? error.message : String(error)}` 
+    };
+  }
+}
+
+// Process incoming webhook data (would be handled by a serverless function in production)
+export async function processWebhookData(integrationId: string, apiKey: string, data: any) {
+  try {
+    // Validate API key
+    const expectedApiKey = generateApiKey(integrationId);
+    if (apiKey !== expectedApiKey) {
+      return { 
+        success: false, 
+        message: "Invalid API key" 
+      };
+    }
+    
+    // In a real implementation, this would process the incoming data
+    // and route it to the appropriate automation workflow
+    console.log(`Processing webhook data for integration ${integrationId}:`, data);
+    
+    // Simulate processing success
+    return {
+      success: true,
+      message: "Webhook data processed successfully",
+      timestamp: new Date().toISOString(),
+      integrationId
+    };
+  } catch (error) {
+    console.error("Webhook processing error:", error);
+    return { 
+      success: false, 
+      message: `Failed to process webhook: ${error instanceof Error ? error.message : String(error)}` 
     };
   }
 }
