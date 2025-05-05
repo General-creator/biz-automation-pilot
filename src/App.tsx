@@ -24,6 +24,7 @@ import Help from "./pages/settings/Help";
 import Billing from "./pages/settings/Billing";
 import Profile from "./pages/settings/Profile";
 import Settings from "./pages/settings/Settings";
+import Documentation from "./pages/settings/Documentation";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/settings/analytics" element={<Analytics />} />
               <Route path="/settings/help" element={<Help />} />
               <Route path="/settings/billing" element={<Billing />} />
+              <Route path="/settings/documentation" element={<Documentation />} />
             </Route>
             
             {/* Catch-all route */}
