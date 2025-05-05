@@ -76,13 +76,21 @@ export interface ConnectionData {
 // Generate a pseudo-random API key for integrations
 // In production, this would be handled securely on the server
 export function generateApiKey(integrationId: string): string {
-  return `api_${integrationId.substring(0, 16)}`;
+  // Create a more secure API key format with a prefix that helps identify it as an API key
+  const prefix = "orb_";
+  const randomPart = Array.from(
+    { length: 24 },
+    () => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 62)]
+  ).join("");
+  
+  return `${prefix}${randomPart}_${integrationId.substring(0, 8)}`;
 }
 
 // Get webhook URL for an integration
 export function getWebhookUrl(integrationId: string): string {
-  // In production, this would be your actual API domain
-  return `https://api.yourdomain.com/integrations/${integrationId}/webhook`;
+  // The base URL would typically be your production API domain
+  const baseUrl = "https://ohbugduzkifavxzrgjdn.supabase.co/functions/v1/orbit-api";
+  return `${baseUrl}/runs/log`;
 }
 
 // Test a connection to verify credentials work
@@ -293,5 +301,32 @@ export async function processWebhookData(integrationId: string, apiKey: string, 
       success: false, 
       message: `Failed to process webhook: ${error instanceof Error ? error.message : String(error)}` 
     };
+  }
+}
+
+// Validates API key format
+export function isValidApiKeyFormat(apiKey: string): boolean {
+  // Basic validation - should start with orb_ prefix and be a certain length
+  return apiKey.startsWith("orb_") && apiKey.length >= 32;
+}
+
+// Get API Key for an integration
+export async function getApiKeyForIntegration(integrationId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("integrations")
+      .select("api_key")
+      .eq("id", integrationId)
+      .single();
+      
+    if (error || !data.api_key) {
+      console.error("Failed to get API key:", error);
+      return null;
+    }
+    
+    return data.api_key;
+  } catch (error) {
+    console.error("Error getting API key:", error);
+    return null;
   }
 }

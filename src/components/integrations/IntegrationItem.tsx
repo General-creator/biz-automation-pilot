@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import APIDetails from "./APIDetails";
 import { Activity, Webhook } from "lucide-react";
+import { generateApiKey, getWebhookUrl } from "@/integrations/integration-service";
 
 interface IntegrationItemProps {
   integration: Integration;
@@ -24,10 +25,10 @@ const IntegrationItem = ({
   
   // Generate a deterministic API key based on the integration ID
   // In a real app, this would be stored securely and retrieved from the server
-  const apiKey = `api_${integration.id.substring(0, 16)}`;
+  const apiKey = generateApiKey(integration.id);
   
   // Create a webhook URL with the integration ID
-  const webhookUrl = `https://api.yourdomain.com/integrations/${integration.id}/webhook`;
+  const webhookUrl = getWebhookUrl(integration.id);
   
   return (
     <>

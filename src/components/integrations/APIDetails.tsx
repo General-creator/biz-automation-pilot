@@ -43,12 +43,10 @@ fetch("${webhookUrl}", {
     "Authorization": "Bearer ${apiKey}"
   },
   body: JSON.stringify({
-    data: {
-      // Your data goes here
-      message: "Hello from your automation!",
-      timestamp: new Date().toISOString(),
-      source: "YourAutomationTool"
-    }
+    automationName: "Your Automation Name",
+    status: "success",  // One of: success, error, warning
+    timestamp: new Date().toISOString(),
+    message: "Automation ran successfully"
   })
 })
 .then(response => response.json())
@@ -65,12 +63,10 @@ const response = await fetch("${webhookUrl}", {
     'Authorization': 'Bearer ${apiKey}'
   },
   body: JSON.stringify({
-    data: {
-      // Add your Zapier data from previous steps
-      zapier_data: inputData,
-      automation_name: 'Zapier Flow',
-      timestamp: new Date().toISOString()
-    }
+    automationName: "Zapier Flow - " + inputData.workflow_name,
+    status: inputData.status || "success",
+    timestamp: new Date().toISOString(),
+    message: inputData.message || "Automated with Zapier"
   })
 });
 
@@ -90,11 +86,10 @@ Headers:
 
 Body (JSON):
 {
-  "data": {
-    "make_data": {{your_previous_module_data}},
-    "automation_name": "Make Flow",
-    "timestamp": "{{formatDate(now; YYYY-MM-DD HH:mm:ss)}}"
-  }
+  "automationName": "{{scenario.name}}",
+  "status": "{{1.status}}",
+  "timestamp": "{{formatDate(now; YYYY-MM-DD HH:mm:ss)}}",
+  "message": "{{1.message}}"
 }
 
 // To find Orbit in Make's app directory:
@@ -112,12 +107,10 @@ const axios = require('axios');
 exports.main = async (event, callback) => {
   try {
     const response = await axios.post('${webhookUrl}', {
-      data: {
-        hubspot_data: event.inputFields,
-        contact_id: event.object.objectId,
-        automation_name: 'HubSpot Workflow',
-        timestamp: new Date().toISOString()
-      }
+      automationName: "HubSpot Workflow - " + event.inputFields.workflow_name,
+      status: event.inputFields.status || "success",
+      timestamp: new Date().toISOString(),
+      message: event.inputFields.message || "Executed from HubSpot"
     }, {
       headers: {
         'Content-Type': 'application/json',
