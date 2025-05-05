@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Integration } from "@/types/integration";
 
 interface IntegrationsListProps {
-  integrations?: any[];
+  integrations?: Integration[];
 }
 
 const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListProps) => {
@@ -26,34 +26,30 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
     isReconnectLoading,
   } = useIntegrations(propIntegrations);
 
-  // Handle disconnect click for integrations in the home page
-  const handleHomePageDisconnect = (id: string) => {
+  // Handle disconnect action - works for both settings page and homepage
+  const handleDisconnectAction = (id: string) => {
+    // Show a toast to inform the user
+    toast("Disconnecting integration...");
+    // Call the core disconnect function from useIntegrations
+    handleDisconnect(id);
+  };
+
+  // Find an integration by ID - unified helper function
+  const findIntegrationById = (id: string): Integration | null => {
     if (propIntegrations) {
-      // For home page, when using propIntegrations
-      toast("Disconnecting integration...");
-      handleDisconnect(id);
+      // For homepage, search in prop integrations
+      return propIntegrations.find(int => int.id === id) || null;
     } else {
-      handleDisconnect(id);
+      // For settings page, search in grouped integrations
+      return Object.values(groupedIntegrations)
+        .flat()
+        .find(int => int.id === id) || null;
     }
   };
 
   // Open the reconnect form with the selected integration
-  const handleReconnectWithForm = (id: string) => {
-    const integration = Object.values(groupedIntegrations)
-      .flat()
-      .find(int => int.id === id);
-    
-    if (integration) {
-      setReconnectIntegration(integration);
-      setIsConnectFormOpen(true);
-    } else {
-      toast.error("Integration not found");
-    }
-  };
-  
-  // Handle reconnect click for integrations in the home page
-  const handleHomePageReconnect = (id: string) => {
-    const integration = propIntegrations?.find(int => int.id === id);
+  const handleReconnectAction = (id: string) => {
+    const integration = findIntegrationById(id);
     
     if (integration) {
       setReconnectIntegration(integration);
@@ -98,8 +94,8 @@ const IntegrationsList = ({ integrations: propIntegrations }: IntegrationsListPr
                   key={category}
                   category={category === "workflow" ? "Workflow" : category === "agent" ? "Agent" : category}
                   integrations={items}
-                  onDisconnect={propIntegrations ? handleHomePageDisconnect : handleDisconnect}
-                  onReconnect={propIntegrations ? handleHomePageReconnect : handleReconnectWithForm}
+                  onDisconnect={handleDisconnectAction}
+                  onReconnect={handleReconnectAction}
                   isLoading={isDisconnectLoading || isReconnectLoading}
                 />
               ))}
