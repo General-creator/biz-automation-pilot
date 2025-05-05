@@ -9,7 +9,8 @@ import {
   Settings as SettingsIcon,
   BarChart3,
   HelpCircle,
-  Plug
+  Plug,
+  FileText
 } from "lucide-react";
 
 const Settings = () => {
@@ -112,6 +113,22 @@ const Settings = () => {
                 </p>
                 <Button asChild variant="orbit" className="w-full">
                   <Link to="/settings/help">Go to Help</Link>
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" /> Documentation
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  Access detailed documentation and API references
+                </p>
+                <Button asChild variant="orbit" className="w-full">
+                  <Link to="/settings/documentation">Go to Documentation</Link>
                 </Button>
               </CardContent>
             </Card>
