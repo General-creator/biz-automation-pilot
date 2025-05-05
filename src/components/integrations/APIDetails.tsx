@@ -97,6 +97,11 @@ Body (JSON):
   }
 }
 
+// To find Orbit in Make's app directory:
+// 1. Go to Make.com and look for Orbit in the apps directory
+// 2. Or search for "Orbit Automation Intelligence" when adding a new module
+// 3. See our developer docs at: https://developers.make.com/custom-apps-documentation/basics/create-your-app
+
 // Use the 'Parse JSON' option for the response if needed
 `.trim(),
 
@@ -233,7 +238,12 @@ exports.main = async (event, callback) => {
               <div className="p-4 bg-muted rounded-md overflow-x-auto">
                 <pre className="text-xs font-mono">{codeExamples.make}</pre>
               </div>
-              <div className="mt-2 flex justify-end">
+              <div className="mt-2 flex justify-between">
+                <Button variant="link" size="sm" className="text-xs flex items-center gap-1" asChild>
+                  <a href="https://developers.make.com/custom-apps-documentation/basics/create-your-app" target="_blank" rel="noopener noreferrer">
+                    Orbit on Make <ExternalLink className="h-3 w-3" />
+                  </a>
+                </Button>
                 <Button variant="link" size="sm" className="text-xs flex items-center gap-1" asChild>
                   <a href="https://www.make.com/en/help/tools/http" target="_blank" rel="noopener noreferrer">
                     Make HTTP Docs <ExternalLink className="h-3 w-3" />
