@@ -20,7 +20,8 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshProfile: () => Promise<void>; // New function to refresh profile data
+  refreshProfile: () => Promise<void>;
+  isOffline: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,7 +39,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
   const { toast } = useToast();
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Fetch user profile data
   const fetchProfile = async (userId: string) => {
@@ -110,6 +126,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
+      if (isOffline) {
+        throw new Error("You appear to be offline. Please check your internet connection and try again.");
+      }
+      
       setIsLoading(true);
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -125,12 +145,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Login successful",
         description: "Welcome back!",
       });
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "Please check your credentials",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      // Check for network-related errors
+      if (error.message.includes('Failed to fetch') || error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast({
+          title: "Connection error",
+          description: "Unable to connect to authentication service. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: error instanceof Error ? error.message : "Please check your credentials",
+          variant: "destructive",
+        });
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -139,6 +168,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string) => {
     try {
+      if (isOffline) {
+        throw new Error("You appear to be offline. Please check your internet connection and try again.");
+      }
+      
       setIsLoading(true);
       
       const { data, error } = await supabase.auth.signUp({
@@ -159,12 +192,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Registration successful",
         description: "Your account has been created",
       });
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      // Check for network-related errors
+      if (error.message.includes('Failed to fetch') || error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast({
+          title: "Connection error",
+          description: "Unable to connect to authentication service. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Registration failed",
+          description: error instanceof Error ? error.message : "Please try again",
+          variant: "destructive",
+        });
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -197,7 +239,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login, 
       register, 
       logout,
-      refreshProfile 
+      refreshProfile,
+      isOffline
     }}>
       {children}
     </AuthContext.Provider>
